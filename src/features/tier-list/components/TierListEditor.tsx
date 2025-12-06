@@ -25,6 +25,7 @@ import {
 import { RotateCcw, Plus } from "lucide-react";
 import { useTierStore } from "../store";
 import { TierItem as TierItemType, TierRow as TierRowType } from "../index";
+import { TIER_DEFAULTS } from "../constants";
 import { TierRow } from "./TierRow";
 import { TierItem } from "./TierItem";
 import { ItemPool } from "./ItemPool";
@@ -436,21 +437,13 @@ export function TierListEditor() {
           variant="outline"
           className="w-full border-dashed border-2 gap-2 hover:border-primary hover:bg-primary/5 transition-all group py-3"
           onClick={() => {
-            const TIER_DEFAULTS = [
-              { name: "S", color: "#FF7F7F" },
-              { name: "A", color: "#FFBF7F" },
-              { name: "B", color: "#FFFF7F" },
-              { name: "C", color: "#7FFF7F" },
-              { name: "D", color: "#7FBFFF" },
-              { name: "E", color: "#7F7FFF" },
-              { name: "F", color: "#FF7FFF" },
-            ];
             const existingNames = currentList.rows.map(r => r.name);
             const nextIndex = currentList.rows.length % TIER_DEFAULTS.length;
-            let newName = TIER_DEFAULTS[nextIndex].name;
+            const baseName = TIER_DEFAULTS[nextIndex].name;
+            let newName: string = baseName;
             let counter = 1;
             while (existingNames.includes(newName)) {
-              newName = `${TIER_DEFAULTS[nextIndex].name}${counter}`;
+              newName = `${baseName}${counter}`;
               counter++;
             }
             addCustomTier(newName, TIER_DEFAULTS[nextIndex].color);

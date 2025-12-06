@@ -6,6 +6,7 @@ import { Upload, Image as ImageIcon, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTierStore } from "../store";
 import { toast } from "sonner";
+import { IMAGE_MAX_WIDTH, IMAGE_MAX_HEIGHT, IMAGE_QUALITY } from "../constants";
 
 interface ImageUploadProps {
   className?: string;
@@ -27,8 +28,8 @@ async function processImage(file: File): Promise<string> {
         }
 
         // Max dimensions for tier list items
-        const maxWidth = 150;
-        const maxHeight = 150;
+        const maxWidth = IMAGE_MAX_WIDTH;
+        const maxHeight = IMAGE_MAX_HEIGHT;
 
         let { width, height } = img;
 
@@ -52,7 +53,7 @@ async function processImage(file: File): Promise<string> {
         ctx.drawImage(img, 0, 0, width, height);
 
         // Convert to base64 with compression
-        const base64 = canvas.toDataURL("image/jpeg", 0.7);
+        const base64 = canvas.toDataURL("image/jpeg", IMAGE_QUALITY);
         resolve(base64);
       };
       img.onerror = () => reject(new Error("Failed to load image"));

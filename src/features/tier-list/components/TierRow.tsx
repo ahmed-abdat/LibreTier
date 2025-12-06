@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTierStore } from "../store";
+import { PRESET_COLORS } from "../constants";
 
 interface TierRowProps {
   row: TierRowType;
@@ -30,17 +31,6 @@ interface TierRowProps {
   isRowOverlay?: boolean;
 }
 
-const PRESET_COLORS = [
-  "#FF7F7F", // Light red
-  "#FFBF7F", // Light orange
-  "#FFFF7F", // Light yellow
-  "#7FFF7F", // Light green
-  "#7FBFFF", // Light blue
-  "#7F7FFF", // Light indigo
-  "#FF7FFF", // Light purple
-  "#FFFFFF", // White
-  "#808080", // Gray
-];
 
 export function TierRow({
   row,
@@ -232,6 +222,7 @@ export function TierRow({
               !isExporting && "hover:bg-black/10 transition-colors"
             )}
             title={!isExporting ? "Click to edit tier name" : undefined}
+            aria-label={`Edit tier name: ${row.name || row.level}`}
           >
             <span
               className="drop-shadow-sm select-none"

@@ -14,6 +14,35 @@ export const TIER_COLORS: Record<TierLevel, string> = {
   F: "#FF7FFF", // Light purple
 };
 
+// Preset colors for tier customization (includes additional options)
+export const PRESET_COLORS = [
+  "#FF7F7F", // Light red
+  "#FFBF7F", // Light orange
+  "#FFFF7F", // Light yellow
+  "#7FFF7F", // Light green
+  "#7FBFFF", // Light blue
+  "#7F7FFF", // Light indigo
+  "#FF7FFF", // Light purple
+  "#FFFFFF", // White
+  "#808080", // Gray
+] as const;
+
+// Tier defaults for adding new tiers (name + color pairs)
+export const TIER_DEFAULTS = [
+  { name: "S", color: "#FF7F7F" },
+  { name: "A", color: "#FFBF7F" },
+  { name: "B", color: "#FFFF7F" },
+  { name: "C", color: "#7FFF7F" },
+  { name: "D", color: "#7FBFFF" },
+  { name: "E", color: "#7F7FFF" },
+  { name: "F", color: "#FF7FFF" },
+] as const;
+
+// Image processing constants
+export const IMAGE_MAX_WIDTH = 150;
+export const IMAGE_MAX_HEIGHT = 150;
+export const IMAGE_QUALITY = 0.7;
+
 // Maximum items allowed per tier
 export const MAX_ITEMS_PER_TIER = 50;
 

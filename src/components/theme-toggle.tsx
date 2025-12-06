@@ -74,34 +74,39 @@ export function ThemeToggle({
       return;
     }
 
-    await document.startViewTransition(() => {
-      flushSync(() => {
-        applyTheme(newTheme);
-      });
-    }).ready;
+    try {
+      await document.startViewTransition(() => {
+        flushSync(() => {
+          applyTheme(newTheme);
+        });
+      }).ready;
 
-    const { top, left, width, height } =
-      buttonRef.current.getBoundingClientRect();
-    const x = left + width / 2;
-    const y = top + height / 2;
-    const maxRadius = Math.hypot(
-      Math.max(left, window.innerWidth - left),
-      Math.max(top, window.innerHeight - top)
-    );
+      const { top, left, width, height } =
+        buttonRef.current.getBoundingClientRect();
+      const x = left + width / 2;
+      const y = top + height / 2;
+      const maxRadius = Math.hypot(
+        Math.max(left, window.innerWidth - left),
+        Math.max(top, window.innerHeight - top)
+      );
 
-    document.documentElement.animate(
-      {
-        clipPath: [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${maxRadius}px at ${x}px ${y}px)`,
-        ],
-      },
-      {
-        duration,
-        easing: "ease-in-out",
-        pseudoElement: "::view-transition-new(root)",
-      }
-    );
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${maxRadius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration,
+          easing: "ease-in-out",
+          pseudoElement: "::view-transition-new(root)",
+        }
+      );
+    } catch {
+      // Fallback if view transition fails
+      applyTheme(newTheme);
+    }
   }, [isDark, duration, applyTheme]);
 
   // Prevent hydration mismatch
