@@ -22,10 +22,10 @@ Tier Maker is a modern web application for creating and sharing tier-based ranki
 ## Commands
 
 ```bash
-npm run dev      # Start development server with Turbopack
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Run ESLint
+pnpm dev      # Start development server with Turbopack
+pnpm build    # Build for production
+pnpm start    # Start production server
+pnpm lint     # Run ESLint
 ```
 
 ## Project Structure
