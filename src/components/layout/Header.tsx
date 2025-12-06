@@ -8,7 +8,7 @@ export function Header() {
       <div className="container mx-auto max-w-6xl flex h-14 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/tier_list_logo.webp"
+            src="/tier_list_logo.png"
             alt="Tier Maker Logo"
             width={40}
             height={40}

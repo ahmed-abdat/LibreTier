@@ -14,20 +14,20 @@ export const metadata: Metadata = {
     "Rank anything with customizable tier lists. Upload images, drag to organize, and export to share with friends.",
   icons: {
     icon: "/favicon.ico",
-    apple: "/tier_list_logo.webp",
+    apple: "/tier_list_logo.png",
   },
   openGraph: {
     title: "Tier Maker - Create Beautiful Tier Lists",
     description:
       "Rank anything with customizable tier lists. Upload images, drag to organize, and export to share with friends.",
-    images: ["/tier_list_logo.webp"],
+    images: ["/tier_list_logo.png"],
   },
   twitter: {
     card: "summary",
     title: "Tier Maker - Create Beautiful Tier Lists",
     description:
       "Rank anything with customizable tier lists. Upload images, drag to organize, and export to share with friends.",
-    images: ["/tier_list_logo.webp"],
+    images: ["/tier_list_logo.png"],
   },
 };
 

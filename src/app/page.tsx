@@ -15,7 +15,7 @@ export default function Home() {
         <div className="container mx-auto max-w-6xl flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5 group">
             <Image
-              src="/tier_list_logo.webp"
+              src="/tier_list_logo.png"
               alt="Tier Maker Logo"
               width={44}
               height={44}
