@@ -6,19 +6,6 @@ import { flushSync } from "react-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-// View Transitions API types
-interface ViewTransition {
-  ready: Promise<void>;
-  finished: Promise<void>;
-  updateCallbackDone: Promise<void>;
-}
-
-declare global {
-  interface Document {
-    startViewTransition?: (callback: () => void) => ViewTransition;
-  }
-}
-
 interface ThemeToggleProps extends React.ComponentPropsWithoutRef<"button"> {
   duration?: number;
 }
