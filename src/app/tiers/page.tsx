@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export default function TiersPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background via-background to-muted/20">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto max-w-6xl flex h-16 items-center justify-between px-4">
@@ -27,12 +27,12 @@ export default function TiersPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
         <TierListGallery />
       </main>
 
       {/* Footer */}
-      <footer className="border-t mt-auto">
+      <footer className="border-t">
         <div className="container mx-auto max-w-6xl px-4 py-6">
           <p className="text-center text-sm text-muted-foreground">
             Create beautiful tier lists. No account required.

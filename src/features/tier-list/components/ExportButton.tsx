@@ -101,17 +101,17 @@ export function ExportButton({
       onClick={handleExport}
       disabled={isDisabled}
       variant="outline"
-      className={!hasItems ? "opacity-50 cursor-not-allowed" : ""}
+      className={`h-10 sm:h-9 px-3 sm:px-4 ${!hasItems ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       {isExporting ? (
         <>
           <Loader2 className="h-4 w-4 animate-spin" />
-          Exporting...
+          <span className="hidden sm:inline ml-2">Exporting...</span>
         </>
       ) : (
         <>
           <Download className="h-4 w-4" />
-          Export as Image
+          <span className="hidden sm:inline ml-2">Export as Image</span>
         </>
       )}
     </Button>

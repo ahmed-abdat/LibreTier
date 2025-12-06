@@ -13,25 +13,29 @@ body {
 
 /* Smooth Scrolling & Scrollbar Styles */
 ::-webkit-scrollbar {
-  @apply w-2;
+  @apply w-2 h-2;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-background/50 rounded-full;
+  @apply bg-muted/50 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-brand-blue/50 rounded-full transition-colors hover:bg-brand-blue;
+  @apply bg-primary/40 rounded-full transition-colors hover:bg-primary/70;
+}
+
+::-webkit-scrollbar-corner {
+  @apply bg-transparent;
 }
 
 /* Selection Styles */
 ::selection {
-  @apply bg-brand-blue/20 text-brand-blue-dark;
+  @apply bg-primary/20 text-primary;
 }
 
 /* Focus Styles */
 :focus-visible {
-  @apply outline-none ring-2 ring-brand-blue ring-offset-2 ring-offset-background;
+  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
 }
 
 /* Transition Styles */
@@ -106,16 +110,16 @@ body {
 
   /* Enhanced Dark Mode Scrollbar */
   .dark ::-webkit-scrollbar-track {
-    @apply bg-background/30;
+    @apply bg-muted/30;
   }
 
   .dark ::-webkit-scrollbar-thumb {
-    @apply bg-brand-blue-light/50 hover:bg-brand-blue-light;
+    @apply bg-primary/50 hover:bg-primary/80;
   }
 
   /* Dark Mode Selection */
   .dark ::selection {
-    @apply bg-brand-blue-light/20 text-brand-blue-light;
+    @apply bg-primary/30 text-primary;
   }
 }
 

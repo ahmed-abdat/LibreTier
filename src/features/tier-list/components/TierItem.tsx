@@ -130,19 +130,20 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
             }}
             onPointerDown={(e) => e.stopPropagation()}
             className={cn(
-              "absolute -top-2 -right-2 w-6 h-6 rounded-full",
+              "absolute -top-2 -right-2 w-7 h-7 sm:w-6 sm:h-6 rounded-full",
               "bg-destructive text-destructive-foreground",
               "flex items-center justify-center",
-              "opacity-0 group-hover:opacity-100",
-              "scale-75 group-hover:scale-100",
+              // Always visible on mobile (coarse pointer), hover-reveal on desktop
+              "opacity-100 scale-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:scale-75",
+              "[@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-100",
               "transition-all duration-150 ease-out",
               "shadow-lg hover:shadow-xl",
-              "hover:bg-destructive/90 active:scale-95",
+              "hover:bg-destructive/90 active:scale-90",
               "z-20 focus:outline-none focus:ring-2 focus:ring-destructive/50"
             )}
             aria-label={`Remove ${item.name}`}
           >
-            <X className="w-3.5 h-3.5" strokeWidth={2.5} />
+            <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
           </button>
         </div>
       </TooltipTrigger>

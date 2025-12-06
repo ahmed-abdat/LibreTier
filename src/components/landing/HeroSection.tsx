@@ -34,12 +34,12 @@ export function HeroSection() {
       className="flex flex-col items-center justify-center min-h-[80vh] px-4 py-16"
     >
       {/* Animated illustration */}
-      <motion.div variants={itemVariants} className="relative mb-10">
+      <motion.div variants={itemVariants} className="relative mb-8 sm:mb-10">
         {/* Background glow */}
-        <div className="absolute inset-0 bg-primary/15 blur-[80px] rounded-full scale-150" />
+        <div className="absolute inset-0 bg-primary/15 blur-[60px] sm:blur-[80px] rounded-full scale-150" />
 
         {/* Stacked tier cards illustration */}
-        <div className="relative">
+        <div className="relative scale-75 sm:scale-100">
           {/* Back card - Yellow tier color */}
           <motion.div
             initial={{ rotate: -8, y: 10 }}
@@ -96,24 +96,24 @@ export function HeroSection() {
       </motion.div>
 
       {/* Text content */}
-      <motion.div variants={itemVariants} className="text-center space-y-4 max-w-xl">
-        <span className="inline-block px-3 py-1 rounded-full bg-muted text-muted-foreground text-sm font-medium">
+      <motion.div variants={itemVariants} className="text-center space-y-3 sm:space-y-4 max-w-xl px-2">
+        <span className="inline-block px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs sm:text-sm font-medium">
           No account required
         </span>
-        <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight">
           Create Beautiful Tier Lists
         </h1>
-        <p className="text-muted-foreground text-lg leading-relaxed">
+        <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
           Rank anything with customizable tier lists. Upload images, drag to organize, and export to share with friends.
         </p>
       </motion.div>
 
       {/* CTA Button */}
-      <motion.div variants={itemVariants} className="mt-10">
+      <motion.div variants={itemVariants} className="mt-8 sm:mt-10">
         <Button
           size="lg"
           asChild
-          className="group relative overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-primary/25 px-8 py-7 text-lg font-semibold rounded-xl"
+          className="group relative overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-primary/25 px-6 sm:px-8 py-6 sm:py-7 text-base sm:text-lg font-semibold rounded-xl"
         >
           <Link href="/tiers">
             {/* Shine effect */}
@@ -132,7 +132,7 @@ export function HeroSection() {
       {/* Feature hints */}
       <motion.div
         variants={itemVariants}
-        className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8"
+        className="mt-12 sm:mt-16 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 w-full max-w-2xl px-2"
       >
         {[
           { icon: Upload, text: "Upload images", desc: "Drag & drop files" },
@@ -146,13 +146,13 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 + i * 0.1 }}
             whileHover={{ y: -2 }}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-default"
+            className="flex flex-col items-center gap-1.5 sm:gap-2 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-default"
           >
-            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-              <feature.icon className="w-5 h-5 text-foreground" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-muted flex items-center justify-center">
+              <feature.icon className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
             </div>
-            <span className="font-medium text-sm">{feature.text}</span>
-            <span className="text-xs text-muted-foreground">{feature.desc}</span>
+            <span className="font-medium text-xs sm:text-sm text-center">{feature.text}</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground text-center">{feature.desc}</span>
           </motion.div>
         ))}
       </motion.div>

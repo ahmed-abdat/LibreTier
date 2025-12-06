@@ -126,13 +126,13 @@ export function TierRow({
     return (
       <div className="flex border-2 border-primary rounded-lg shadow-2xl bg-background opacity-95">
         {/* Drag Handle */}
-        <div className="w-8 flex items-center justify-center bg-muted/50 border-r cursor-grabbing">
-          <GripVertical className="h-5 w-5 text-primary" />
+        <div className="w-10 sm:w-8 flex items-center justify-center bg-muted/50 border-r cursor-grabbing">
+          <GripVertical className="h-6 w-6 sm:h-5 sm:w-5 text-primary" />
         </div>
 
         {/* Tier Label */}
         <div
-          className="w-24 min-w-[6rem] flex items-center justify-center font-bold text-xl shrink-0"
+          className="w-16 sm:w-24 min-w-[4rem] sm:min-w-[6rem] flex items-center justify-center font-bold text-lg sm:text-xl shrink-0"
           style={{ backgroundColor: row.color }}
         >
           <span
@@ -184,20 +184,20 @@ export function TierRow({
           {...attributes}
           {...listeners}
           className={cn(
-            "w-8 flex items-center justify-center bg-muted/20 border-r border-border cursor-grab active:cursor-grabbing",
-            "hover:bg-primary/10 transition-all duration-150 group/handle"
+            "w-10 sm:w-8 flex items-center justify-center bg-muted/20 border-r border-border cursor-grab active:cursor-grabbing",
+            "hover:bg-primary/10 active:bg-primary/20 transition-all duration-150 group/handle"
           )}
           title="Drag to reorder"
         >
-          <GripVertical className="h-5 w-5 text-muted-foreground/50 group-hover/handle:text-primary transition-colors" />
+          <GripVertical className="h-6 w-6 sm:h-5 sm:w-5 text-muted-foreground/50 group-hover/handle:text-primary transition-colors" />
         </div>
       )}
 
       {/* Tier Label */}
       <div
         className={cn(
-          "w-24 min-w-[6rem] flex items-center justify-center font-bold text-xl shrink-0 relative group",
-          isExporting && "w-24"
+          "w-16 sm:w-24 min-w-[4rem] sm:min-w-[6rem] flex items-center justify-center font-bold text-lg sm:text-xl shrink-0 relative group",
+          isExporting && "w-24 min-w-[6rem] text-xl"
         )}
         style={{ backgroundColor: row.color }}
       >
@@ -247,9 +247,15 @@ export function TierRow({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-black/30 hover:bg-black/50 hover:scale-110 rounded-full"
+                className={cn(
+                  "absolute top-1 right-1 h-7 w-7 sm:h-6 sm:w-6 rounded-full",
+                  "bg-black/30 hover:bg-black/50 hover:scale-110 active:scale-95",
+                  // Always visible on touch devices, hover-reveal on desktop
+                  "opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100",
+                  "transition-all duration-200"
+                )}
               >
-                <Settings2 className="h-3 w-3 text-white" />
+                <Settings2 className="h-3.5 w-3.5 sm:h-3 sm:w-3 text-white" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64" align="start" side="right">

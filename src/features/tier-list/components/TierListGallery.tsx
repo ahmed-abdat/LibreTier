@@ -112,22 +112,22 @@ export function TierListGallery() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <LayoutGrid className="h-5 w-5 text-primary" />
-            <h2 className="text-2xl font-bold tracking-tight">Your Tier Lists</h2>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Your Tier Lists</h2>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             {tierLists.length === 1
               ? "You have 1 tier list"
               : `You have ${tierLists.length} tier lists`}
           </p>
         </div>
-        <Button onClick={handleCreateNew} className="gap-2 group shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all">
+        <Button onClick={handleCreateNew} className="w-full sm:w-auto gap-2 group shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all h-11 sm:h-10">
           <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
           Create New
         </Button>
       </motion.div>
 
       {/* Search and Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         {/* Search */}
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -142,7 +142,7 @@ export function TierListGallery() {
         {/* Sort dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="default" className="gap-2 h-11">
+            <Button variant="outline" size="default" className="w-full sm:w-auto gap-2 h-11 justify-center sm:justify-start">
               <SortAsc className="h-4 w-4" />
               <span>{sortLabels[sortBy]}</span>
             </Button>

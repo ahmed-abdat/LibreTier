@@ -331,21 +331,21 @@ export function TierListEditor() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between pb-4 border-b">
-        <div className="flex-1 max-w-lg">
+      <div className="flex flex-col gap-4 pb-4 border-b">
+        <div className="flex-1 w-full">
           <Input
             value={currentList.title}
             onChange={(e) => updateList({ title: e.target.value })}
-            className="text-2xl font-bold border-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-auto hover:bg-muted/50 rounded-lg transition-colors -ml-2 pl-2"
+            className="text-xl sm:text-2xl font-bold border-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-auto hover:bg-muted/50 rounded-lg transition-colors -ml-2 pl-2"
             placeholder="Tier List Title"
           />
-          <p className="text-sm text-muted-foreground mt-1 ml-0.5">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 ml-0.5">
             {totalItems === 0
               ? "No items yet — upload some images to get started"
               : `${totalItems} item${totalItems === 1 ? "" : "s"} • ${currentList.rows.length} tiers`}
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap items-center">
+        <div className="flex gap-2 items-center justify-end">
           <ExportButton
             targetRef={exportRef}
             filename={currentList.title.toLowerCase().replace(/\s+/g, "-")}
@@ -353,7 +353,7 @@ export function TierListEditor() {
           />
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="icon" title="Reset tier list" className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-colors">
+              <Button variant="outline" size="icon" title="Reset tier list" className="h-10 w-10 sm:h-9 sm:w-9 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-colors">
                 <RotateCcw className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
@@ -474,16 +474,16 @@ export function TierListEditor() {
       </DndContext>
 
       {/* Help text */}
-      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground pt-4 border-t">
+      <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-[10px] sm:text-xs text-muted-foreground pt-4 border-t">
         <span className="flex items-center gap-1.5">
           <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">Drag</kbd>
           items to rank
         </span>
         <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">Click</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">Tap</kbd>
           tier labels to rename
         </span>
-        <span className="flex items-center gap-1.5">
+        <span className="hidden sm:flex items-center gap-1.5">
           <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">Hover</kbd>
           for more options
         </span>
