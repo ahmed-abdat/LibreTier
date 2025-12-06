@@ -1,0 +1,10 @@
+{
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "context7",
+    "sequential-thinking",
+    "shadcn",
+    "chrome-devtools",
+    "browsermcp"
+  ]
+}

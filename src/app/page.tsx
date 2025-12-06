@@ -17,8 +17,8 @@ export default function Home() {
             <Image
               src="/tier_list_logo.webp"
               alt="Tier Maker Logo"
-              width={36}
-              height={36}
+              width={44}
+              height={44}
               className="rounded-lg shadow-lg group-hover:shadow-xl transition-shadow"
             />
             <span className="text-xl font-bold tracking-tight">Tier Maker</span>

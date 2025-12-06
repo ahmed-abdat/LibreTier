@@ -10,8 +10,8 @@ export function Header() {
           <Image
             src="/tier_list_logo.webp"
             alt="Tier Maker Logo"
-            width={32}
-            height={32}
+            width={40}
+            height={40}
             className="rounded-lg"
           />
           <h1 className="text-xl font-bold">Tier Maker</h1>
