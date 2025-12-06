@@ -15,6 +15,8 @@ Tier Maker is a modern web application for creating and sharing tier-based ranki
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **State Management**: Zustand with persist middleware (localStorage)
 - **Drag and Drop**: DND Kit (@dnd-kit/core, @dnd-kit/sortable)
+- **Animations**: Framer Motion
+- **Theming**: next-themes (dark/light mode)
 - **Image Processing**: Client-side Base64 compression
 - **Export**: html2canvas for PNG export
 - **Form Handling**: React Hook Form with Zod validation
@@ -33,24 +35,38 @@ pnpm lint     # Run ESLint
 ```
 src/
 ├── app/                    # Next.js App Router pages
-│   └── page.tsx           # Main tier list editor page
+│   ├── page.tsx            # Landing page with hero section
+│   ├── editor/[id]/        # Dynamic tier list editor route
+│   │   └── page.tsx        # Editor page component
+│   ├── tiers/              # Tier lists gallery
+│   │   └── page.tsx        # Gallery page component
+│   ├── layout.tsx          # Root layout with providers
+│   ├── globals.css         # Global styles
+│   └── not-found.tsx       # 404 page
 ├── features/               # Feature-based modules
 │   └── tier-list/          # Tier list feature
 │       ├── components/     # Feature components
 │       │   ├── TierListEditor.tsx  # Main editor with DND context
+│       │   ├── TierListGallery.tsx # Gallery of saved tier lists
+│       │   ├── TierListCard.tsx    # Card for gallery display
 │       │   ├── TierRow.tsx         # Tier row (droppable)
 │       │   ├── TierItem.tsx        # Draggable item
 │       │   ├── ItemPool.tsx        # Unassigned items pool
 │       │   ├── ImageUpload.tsx     # Drag & drop image upload
-│       │   └── ExportButton.tsx    # Export to PNG
+│       │   ├── ExportButton.tsx    # Export to PNG
+│       │   └── EmptyState.tsx      # Empty state component
 │       ├── store/          # Zustand store
-│       │   └── tier-store.ts
+│       │   ├── tier-store.ts
+│       │   └── index.ts
 │       ├── constants.ts    # Tier levels and colors
 │       └── index.ts        # Public API and type exports
 ├── components/
 │   ├── ui/                 # shadcn/ui components
-│   ├── layout/             # Layout components
-│   └── providers/          # Context providers
+│   ├── landing/            # Landing page components
+│   │   └── HeroSection.tsx
+│   ├── layout/             # Layout components (Header)
+│   ├── providers/          # Context providers (theme)
+│   └── theme-toggle.tsx    # Dark/light mode toggle
 └── lib/
     └── utils.ts            # Utility functions (cn helper)
 ```
@@ -80,13 +96,23 @@ Export → html2canvas → PNG download
 ## Component Hierarchy
 
 ```
-TierListEditor (DndContext)
-├── TierRow[] (useDroppable)
-│   └── TierItem[] (useSortable)
-├── ItemPool (useDroppable)
-│   └── TierItem[] (useSortable)
-├── ImageUpload (react-dropzone)
-└── ExportButton (html2canvas)
+App Layout
+├── Header (navigation, theme toggle)
+└── Pages
+    ├── Landing (/)
+    │   └── HeroSection (framer-motion animations)
+    ├── Gallery (/tiers)
+    │   └── TierListGallery
+    │       └── TierListCard[] (saved tier lists)
+    └── Editor (/editor/[id])
+        └── TierListEditor (DndContext)
+            ├── TierRow[] (useDroppable)
+            │   └── TierItem[] (useSortable)
+            ├── ItemPool (useDroppable)
+            │   └── TierItem[] (useSortable)
+            ├── ImageUpload (react-dropzone)
+            ├── ExportButton (html2canvas)
+            └── EmptyState (when no items)
 ```
 
 ## Future Enhancements (Phase 2)
