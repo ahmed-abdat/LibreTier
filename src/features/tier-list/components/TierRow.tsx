@@ -103,9 +103,10 @@ export function TierRow({
   const itemIds = row.items.map((item) => item.id);
   const showDropHighlight = isOverProp || isDroppableOver;
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
+    WebkitTouchCallout: "none",
   };
 
   // Helper function to determine if text should be dark or light based on background
@@ -185,7 +186,8 @@ export function TierRow({
           {...listeners}
           className={cn(
             "w-10 sm:w-8 flex items-center justify-center bg-muted/20 border-r border-border cursor-grab active:cursor-grabbing",
-            "hover:bg-primary/10 active:bg-primary/20 transition-all duration-150 group/handle"
+            "hover:bg-primary/10 active:bg-primary/20 transition-all duration-150 group/handle",
+            "touch-none select-none"
           )}
           title="Drag to reorder"
         >

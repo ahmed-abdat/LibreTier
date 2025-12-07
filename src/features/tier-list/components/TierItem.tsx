@@ -40,9 +40,10 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
     },
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
+    WebkitTouchCallout: "none",
   };
 
   // Render image or fallback
@@ -100,6 +101,7 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
             "relative w-[72px] h-[72px] rounded-lg overflow-visible cursor-grab active:cursor-grabbing group",
             "transition-all duration-150 ease-out",
             "hover:z-10",
+            "touch-none select-none",
             isDragging && "opacity-40 scale-95"
           )}
         >
