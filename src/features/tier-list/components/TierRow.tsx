@@ -250,14 +250,15 @@ export function TierRow({
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "absolute top-1 right-1 h-7 w-7 sm:h-6 sm:w-6 rounded-full",
-                  "bg-black/30 hover:bg-black/50 hover:scale-110 active:scale-95",
+                  "absolute top-1 right-1 h-8 w-8 sm:h-6 sm:w-6 rounded-full",
+                  "bg-black/40 hover:bg-black/60 hover:scale-110 active:scale-95",
+                  "border border-white/30 shadow-sm",
                   // Always visible on touch devices, hover-reveal on desktop
                   "opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100",
                   "transition-all duration-200"
                 )}
               >
-                <Settings2 className="h-3.5 w-3.5 sm:h-3 sm:w-3 text-white" />
+                <Settings2 className="h-4 w-4 sm:h-3 sm:w-3 text-white" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64" align="start" side="right">
