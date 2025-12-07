@@ -54,6 +54,14 @@ export function ExportButton({
         logging: false,
         // Ensure all images are loaded
         onclone: (clonedDoc) => {
+          // Ensure theme is applied to cloned document
+          const isDark = resolvedTheme === "dark";
+          clonedDoc.documentElement.classList.toggle("dark", isDark);
+          clonedDoc.documentElement.classList.toggle("light", !isDark);
+          clonedDoc.documentElement.style.colorScheme = isDark
+            ? "dark"
+            : "light";
+
           // Make sure cloned element is visible
           const clonedElement = clonedDoc.body.querySelector(
             "[data-export-target]"
@@ -68,6 +76,13 @@ export function ExportButton({
           if (exportTitle) {
             exportTitle.classList.remove("hidden");
           }
+          // Hide drag handles during export
+          const dragHandles = clonedDoc.body.querySelectorAll(
+            "[data-drag-handle]"
+          );
+          dragHandles.forEach((handle) => {
+            (handle as HTMLElement).style.display = "none";
+          });
         },
       });
 

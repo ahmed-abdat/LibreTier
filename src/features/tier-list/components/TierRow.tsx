@@ -184,6 +184,7 @@ export function TierRow({
         <div
           {...attributes}
           {...listeners}
+          data-drag-handle
           className={cn(
             "w-10 sm:w-8 flex items-center justify-center bg-muted/20 border-r border-border cursor-grab active:cursor-grabbing",
             "hover:bg-primary/10 active:bg-primary/20 transition-all duration-150 group/handle",
