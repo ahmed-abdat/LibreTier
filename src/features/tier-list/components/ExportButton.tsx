@@ -69,19 +69,19 @@ export function ExportButton({
           if (clonedElement) {
             (clonedElement as HTMLElement).style.transform = "none";
           }
-          // Show the title for export
-          const exportTitle = clonedDoc.body.querySelector(
-            "[data-export-title]"
-          );
-          if (exportTitle) {
-            (exportTitle as HTMLElement).style.display = "block";
-          }
           // Hide drag handles during export
           const dragHandles = clonedDoc.body.querySelectorAll(
             "[data-drag-handle]"
           );
           dragHandles.forEach((handle) => {
             (handle as HTMLElement).style.display = "none";
+          });
+          // Hide edit buttons during export
+          const editButtons = clonedDoc.body.querySelectorAll(
+            "[data-edit-button]"
+          );
+          editButtons.forEach((btn) => {
+            (btn as HTMLElement).style.display = "none";
           });
         },
       });

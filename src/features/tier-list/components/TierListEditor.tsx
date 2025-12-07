@@ -23,7 +23,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { RotateCcw, Plus } from "lucide-react";
+import { RotateCcw, Plus, Pencil } from "lucide-react";
 import { useTierStore } from "../store";
 import { TierItem as TierItemType, TierRow as TierRowType } from "../index";
 import { TIER_DEFAULTS } from "../constants";
@@ -51,10 +51,12 @@ type ActiveDragType = "item" | "row" | null;
 
 export function TierListEditor() {
   const exportRef = useRef<HTMLDivElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const [activeItem, setActiveItem] = useState<TierItemType | null>(null);
   const [activeRow, setActiveRow] = useState<TierRowType | null>(null);
   const [activeDragType, setActiveDragType] = useState<ActiveDragType>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   const {
     getCurrentList,
@@ -335,24 +337,36 @@ export function TierListEditor() {
 
   const totalItems = currentList.rows.reduce((acc, row) => acc + row.items.length, 0) + currentList.unassignedItems.length;
 
+  // Focus title input when editing starts
+  const handleEditTitle = () => {
+    setIsEditingTitle(true);
+    setTimeout(() => {
+      titleInputRef.current?.focus();
+      titleInputRef.current?.select();
+    }, 0);
+  };
+
+  const handleTitleBlur = () => {
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === "Escape") {
+      setIsEditingTitle(false);
+      titleInputRef.current?.blur();
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 pb-4 border-b">
-        <div className="flex-1 w-full">
-          <Input
-            value={currentList.title}
-            onChange={(e) => updateList({ title: e.target.value })}
-            className="text-2xl sm:text-3xl font-bold border-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-auto hover:bg-muted/50 rounded-lg transition-colors -ml-2 pl-2"
-            placeholder="Tier List Title"
-          />
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1 ml-0.5">
-            {totalItems === 0
-              ? "No items yet — upload some images to get started"
-              : `${totalItems} item${totalItems === 1 ? "" : "s"} • ${currentList.rows.length} tiers`}
-          </p>
-        </div>
-        <div className="flex gap-2 items-center justify-end">
+      {/* Header - Actions only */}
+      <div className="flex items-center justify-between gap-4 pb-4 border-b">
+        <p className="text-xs sm:text-sm text-muted-foreground">
+          {totalItems === 0
+            ? "No items yet — upload some images to get started"
+            : `${totalItems} item${totalItems === 1 ? "" : "s"} • ${currentList.rows.length} tiers`}
+        </p>
+        <div className="flex gap-2 items-center">
           <ExportButton
             targetRef={exportRef}
             filename={currentList.title.toLowerCase().replace(/\s+/g, "-")}
@@ -408,12 +422,34 @@ export function TierListEditor() {
           data-export-target
           className="rounded-xl border shadow-lg overflow-hidden bg-background"
         >
-          {/* Title for export - hidden in UI, shown when exporting */}
+          {/* Editable Title - Always visible */}
           <div
             data-export-title
-            className="hidden bg-gradient-to-r from-muted/80 to-muted/40 px-4 py-3 border-b"
+            className="bg-gradient-to-r from-muted/80 to-muted/40 px-4 py-3 border-b group relative"
           >
-            <h2 className="font-bold text-lg">{currentList.title}</h2>
+            {isEditingTitle ? (
+              <Input
+                ref={titleInputRef}
+                value={currentList.title}
+                onChange={(e) => updateList({ title: e.target.value })}
+                onBlur={handleTitleBlur}
+                onKeyDown={handleTitleKeyDown}
+                className="text-lg font-bold border-none bg-transparent px-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                placeholder="Tier List Title"
+              />
+            ) : (
+              <>
+                <h2 className="font-bold text-lg">{currentList.title || "Untitled Tier List"}</h2>
+                <button
+                  onClick={handleEditTitle}
+                  data-edit-button
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 hover:bg-black/10 transition-all"
+                  title="Edit title"
+                >
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </>
+            )}
           </div>
 
           {/* Tier Rows with Sortable Context for row reordering */}
