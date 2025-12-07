@@ -98,7 +98,7 @@ export default function EditorPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/tiers")}
               className="shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
