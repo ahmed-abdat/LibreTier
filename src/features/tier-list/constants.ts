@@ -42,6 +42,7 @@ export const TIER_DEFAULTS = [
 export const IMAGE_MAX_WIDTH = 150;
 export const IMAGE_MAX_HEIGHT = 150;
 export const IMAGE_QUALITY = 0.7;
+export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 // Maximum items allowed per tier
 export const MAX_ITEMS_PER_TIER = 50;

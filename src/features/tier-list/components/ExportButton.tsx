@@ -71,28 +71,36 @@ export function ExportButton({
         },
       });
 
-      // Convert to blob and download
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            toast.error("Failed to generate image", { id: toastId });
-            return;
-          }
+      // Convert to blob and download with timeout protection
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Image generation timed out"));
+        }, 10000);
 
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = `${filename}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
+        canvas.toBlob(
+          (blob) => {
+            clearTimeout(timeout);
+            if (!blob) {
+              reject(new Error("Failed to generate image blob"));
+              return;
+            }
 
-          toast.success("Tier list exported!", { id: toastId });
-        },
-        "image/png",
-        1.0
-      );
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${filename}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            toast.success("Tier list exported!", { id: toastId });
+            resolve();
+          },
+          "image/png",
+          1.0
+        );
+      });
     } catch (error) {
       console.error("Export error:", error);
       toast.error("Failed to export tier list", { id: toastId });
@@ -108,35 +116,44 @@ export function ExportButton({
       onClick={handleExport}
       disabled={isDisabled}
       variant="outline"
-      className={`h-10 sm:h-9 px-3 sm:px-4 ${!hasItems ? "opacity-50 cursor-not-allowed" : ""}`}
+      aria-busy={isExporting}
+      aria-label={
+        isExporting ? "Exporting tier list" : "Export tier list as image"
+      }
+      className={`h-10 px-3 sm:h-9 sm:px-4 ${!hasItems ? "cursor-not-allowed opacity-50" : ""}`}
     >
       {isExporting ? (
         <>
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="hidden sm:inline ml-2">Exporting...</span>
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          <span className="ml-2 hidden sm:inline">Exporting...</span>
         </>
       ) : (
         <>
-          <Download className="h-4 w-4" />
-          <span className="hidden sm:inline ml-2">Export as Image</span>
+          <Download className="h-4 w-4" aria-hidden="true" />
+          <span className="ml-2 hidden sm:inline">Export as Image</span>
         </>
       )}
     </Button>
   );
 
-  // Show tooltip when disabled due to no items
-  if (!hasItems && !isExporting) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span tabIndex={0}>{button}</span>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Add items to your tier list to export</p>
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
+  // Always show tooltip with different messages
+  const tooltipMessage =
+    !hasItems && !isExporting
+      ? "Add items to your tier list to export"
+      : "Export tier list as PNG image";
 
-  return button;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {!hasItems && !isExporting ? (
+          <span role="presentation">{button}</span>
+        ) : (
+          button
+        )}
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{tooltipMessage}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 }
