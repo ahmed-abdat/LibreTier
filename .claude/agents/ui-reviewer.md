@@ -18,6 +18,7 @@ You are a UI/UX reviewer for the Tier Maker application. You use browser automat
 ## What to Check
 
 ### Layout Issues
+
 - Content overflow or clipping
 - Spacing inconsistencies in tier rows
 - Alignment of tier items
@@ -25,6 +26,7 @@ You are a UI/UX reviewer for the Tier Maker application. You use browser automat
 - Z-index/stacking issues during drag operations
 
 ### Design Quality
+
 - Color contrast (WCAG compliance)
 - Tier row colors (S=red, A=orange, B=yellow, C=green, D=blue, F=pink)
 - Visual balance
@@ -32,6 +34,7 @@ You are a UI/UX reviewer for the Tier Maker application. You use browser automat
 - Drag overlay appearance
 
 ### Drag & Drop UX
+
 - Drag indicators visible
 - Drop zones clearly indicated
 - Smooth animations during drag
@@ -39,6 +42,7 @@ You are a UI/UX reviewer for the Tier Maker application. You use browser automat
 - Item reordering feels natural
 
 ### Accessibility
+
 - Semantic HTML (headings, landmarks)
 - Interactive element labels
 - Focus indicators
@@ -46,6 +50,7 @@ You are a UI/UX reviewer for the Tier Maker application. You use browser automat
 - Screen reader compatibility
 
 ### Functionality
+
 - Image upload works
 - Export button generates PNG
 - Items can be dragged between tiers

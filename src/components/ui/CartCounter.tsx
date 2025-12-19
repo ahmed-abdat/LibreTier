@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { FaMinus, FaPlus } from "react-icons/fa6";
+import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type CartCounterProps = {
@@ -25,10 +25,10 @@ const CartCounter = ({
   return (
     <div
       className={cn(
-        "bg-secondary rounded-full flex items-center justify-between",
+        "flex items-center justify-between rounded-full bg-secondary",
         isSmall
-          ? "min-w-[90px] max-w-[90px] py-2 px-3"
-          : "min-w-[110px] max-w-[110px] sm:max-w-[170px] py-3 md:py-3.5 px-4 sm:px-5",
+          ? "min-w-[90px] max-w-[90px] px-3 py-2"
+          : "min-w-[110px] max-w-[110px] px-4 py-3 sm:max-w-[170px] sm:px-5 md:py-3.5",
         className
       )}
     >
@@ -38,16 +38,14 @@ const CartCounter = ({
         type="button"
         className={cn(
           "hover:bg-transparent",
-          isSmall ? "h-5 w-5" : "h-5 w-5 sm:h-6 sm:w-6 text-xl",
-          value === 1 && "opacity-50 cursor-not-allowed"
+          isSmall ? "h-5 w-5" : "h-5 w-5 text-xl sm:h-6 sm:w-6",
+          value === 1 && "cursor-not-allowed opacity-50"
         )}
         onClick={onDecrement}
         disabled={value === 1}
         aria-label="Decrease quantity"
       >
-        <FaMinus
-          className={cn(isSmall ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4")}
-        />
+        <Minus className={cn(isSmall ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4")} />
       </Button>
       <span
         className={cn(
@@ -63,12 +61,12 @@ const CartCounter = ({
         type="button"
         className={cn(
           "hover:bg-transparent",
-          isSmall ? "h-5 w-5" : "h-5 w-5 sm:h-6 sm:w-6 text-xl"
+          isSmall ? "h-5 w-5" : "h-5 w-5 text-xl sm:h-6 sm:w-6"
         )}
         onClick={onIncrement}
         aria-label="Increase quantity"
       >
-        <FaPlus className={cn(isSmall ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4")} />
+        <Plus className={cn(isSmall ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4")} />
       </Button>
     </div>
   );

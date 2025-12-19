@@ -53,13 +53,13 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
         <>
           {/* Loading skeleton */}
           {showLoadingState && !imageLoaded && (
-            <div className="absolute inset-0 bg-muted animate-pulse" />
+            <div className="absolute inset-0 animate-pulse bg-muted" />
           )}
           <img
             src={item.imageUrl}
             alt={item.name}
             className={cn(
-              "w-full h-full object-cover transition-opacity duration-200",
+              "h-full w-full object-cover transition-opacity duration-200",
               showLoadingState && !imageLoaded ? "opacity-0" : "opacity-100"
             )}
             draggable={false}
@@ -72,7 +72,7 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
 
     // Text fallback for items without images or failed loads
     return (
-      <div className="w-full h-full flex items-center justify-center text-[10px] text-center p-1.5 font-medium bg-secondary text-secondary-foreground leading-tight">
+      <div className="flex h-full w-full items-center justify-center bg-secondary p-1.5 text-center text-[10px] font-medium leading-tight text-secondary-foreground">
         <span className="line-clamp-3">{item.name}</span>
       </div>
     );
@@ -81,10 +81,10 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
   // Drag overlay - shows while dragging
   if (isOverlay) {
     return (
-      <div className="relative w-[72px] h-[72px] rounded-lg overflow-hidden bg-background border-2 border-primary shadow-2xl scale-110 rotate-2">
+      <div className="relative h-[72px] w-[72px] rotate-2 scale-110 overflow-hidden rounded-lg border-2 border-primary bg-background shadow-2xl">
         {renderContent(false)}
         {/* Drag indicator overlay */}
-        <div className="absolute inset-0 bg-primary/15 pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-primary/15" />
       </div>
     );
   }
@@ -98,17 +98,17 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
           {...attributes}
           {...listeners}
           className={cn(
-            "relative w-[72px] h-[72px] rounded-lg overflow-visible cursor-grab active:cursor-grabbing group",
+            "group relative h-[72px] w-[72px] cursor-grab overflow-visible rounded-lg active:cursor-grabbing",
             "transition-all duration-150 ease-out",
             "hover:z-10",
             "touch-none select-none",
-            isDragging && "opacity-40 scale-95"
+            isDragging && "scale-95 opacity-40"
           )}
         >
           {/* Main item container */}
           <div
             className={cn(
-              "relative w-full h-full rounded-lg overflow-hidden",
+              "relative h-full w-full overflow-hidden rounded-lg",
               "border-2 transition-all duration-150",
               "shadow-sm hover:shadow-lg",
               isDragging
@@ -120,7 +120,7 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
             {renderContent()}
 
             {/* Subtle hover overlay */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-150 pointer-events-none" />
+            <div className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-150 group-hover:bg-black/10" />
           </div>
 
           {/* Delete button - positioned outside the clipped area */}
@@ -132,12 +132,12 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
             }}
             onPointerDown={(e) => e.stopPropagation()}
             className={cn(
-              "absolute -top-2 -right-2 w-7 h-7 sm:w-6 sm:h-6 rounded-full",
+              "absolute -right-2 -top-2 h-7 w-7 rounded-full sm:h-6 sm:w-6",
               "bg-destructive text-destructive-foreground",
               "flex items-center justify-center",
               // Always visible on mobile (coarse pointer), hover-reveal on desktop
-              "opacity-100 scale-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:scale-75",
-              "[@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-100",
+              "scale-100 opacity-100 [@media(hover:hover)]:scale-75 [@media(hover:hover)]:opacity-0",
+              "[@media(hover:hover)]:group-hover:scale-100 [@media(hover:hover)]:group-hover:opacity-100",
               "transition-all duration-150 ease-out",
               "shadow-lg hover:shadow-xl",
               "hover:bg-destructive/90 active:scale-90",
@@ -145,7 +145,7 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
             )}
             aria-label={`Remove ${item.name}`}
           >
-            <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
+            <X className="h-4 w-4 sm:h-3.5 sm:w-3.5" strokeWidth={2.5} />
           </button>
         </div>
       </TooltipTrigger>
@@ -154,9 +154,11 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
         className="max-w-[180px] px-3 py-2"
         sideOffset={8}
       >
-        <p className="font-medium text-sm leading-tight">{item.name}</p>
+        <p className="text-sm font-medium leading-tight">{item.name}</p>
         {item.description && (
-          <p className="text-xs text-muted-foreground mt-1 leading-snug">{item.description}</p>
+          <p className="mt-1 text-xs leading-snug text-muted-foreground">
+            {item.description}
+          </p>
         )}
       </TooltipContent>
     </Tooltip>

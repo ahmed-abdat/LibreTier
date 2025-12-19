@@ -14,7 +14,13 @@
     },
     "chrome-devtools": {
       "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@latest", "--headless", "--viewport", "1920x1080"]
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--headless",
+        "--viewport",
+        "1920x1080"
+      ]
     },
     "browsermcp": {
       "command": "npx",

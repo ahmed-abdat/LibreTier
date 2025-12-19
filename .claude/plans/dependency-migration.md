@@ -1,6 +1,7 @@
 # Tier Maker - Dependency Migration Plan
 
 ## Overview
+
 **Scope:** Moderate updates - Next.js 16, skip Tailwind 4, remove unused deps, consolidate Radix UI.
 **Created:** 2025-12-07
 **Status:** Ready for execution
@@ -23,6 +24,7 @@ pnpm remove zod @hookform/resolvers react-hook-form
 ## Phase 2: Update Next.js to v16
 
 ### 2.1 Update Core Packages
+
 - [ ] Update `next` to latest
 - [ ] Update `react` and `react-dom` to latest
 - [ ] Update dev dependencies (`@types/react`, `@types/react-dom`, `eslint-config-next`, `@next/eslint-plugin-next`)
@@ -33,10 +35,12 @@ pnpm add -D @types/react@latest @types/react-dom@latest @next/eslint-plugin-next
 ```
 
 ### 2.2 Update Configuration
+
 - [ ] Review `next.config.mjs` - check `experimental.staleTimes` compatibility
 - [ ] Update `overrides` in `package.json` for React types
 
 ### Files to check:
+
 - `next.config.mjs`
 - `package.json`
 
@@ -45,6 +49,7 @@ pnpm add -D @types/react@latest @types/react-dom@latest @next/eslint-plugin-next
 ## Phase 3: Consolidate Radix UI
 
 ### 3.1 Remove Individual Packages
+
 - [ ] Remove all `@radix-ui/react-*` packages (20 packages)
 
 ```bash
@@ -52,6 +57,7 @@ pnpm remove @radix-ui/react-accordion @radix-ui/react-alert-dialog @radix-ui/rea
 ```
 
 ### 3.2 Install Unified Package
+
 - [ ] Install `radix-ui`
 
 ```bash
@@ -59,6 +65,7 @@ pnpm add radix-ui
 ```
 
 ### 3.3 Update Imports in UI Components
+
 - [ ] `src/components/ui/accordion.tsx`
 - [ ] `src/components/ui/alert-dialog.tsx`
 - [ ] `src/components/ui/avatar.tsx`
@@ -80,12 +87,13 @@ pnpm add radix-ui
 - [ ] `src/components/ui/button.tsx` (uses Slot)
 
 **Import pattern change:**
+
 ```typescript
 // Before
-import * as AccordionPrimitive from "@radix-ui/react-accordion"
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
 
 // After
-import { Accordion } from "radix-ui"
+import { Accordion } from "radix-ui";
 // Use: Accordion.Root, Accordion.Item, etc.
 ```
 
@@ -94,6 +102,7 @@ import { Accordion } from "radix-ui"
 ## Phase 4: Update Other Dependencies
 
 ### 4.1 Production Dependencies
+
 - [ ] `lucide-react` (0.483.0 → 0.556.0)
 - [ ] `zustand` (5.0.3 → 5.0.9)
 - [ ] `framer-motion` (already latest)
@@ -114,6 +123,7 @@ pnpm add lucide-react@latest zustand@latest sonner@latest date-fns@latest uuid@l
 ```
 
 ### 4.2 Dev Dependencies
+
 - [ ] `@typescript-eslint/eslint-plugin` (6.21.0 → 8.48.1)
 - [ ] `@typescript-eslint/parser` (6.21.0 → 8.48.1)
 - [ ] `@types/uuid` (10.0.0 → latest)
@@ -129,6 +139,7 @@ pnpm add -D @typescript-eslint/eslint-plugin@latest @typescript-eslint/parser@la
 ## Phase 5: Post-Update Fixes
 
 ### 5.1 Sonner v2 Changes
+
 - [ ] Check `src/app/layout.tsx` - Toaster component props
 - [ ] Review toast usage in:
   - `src/features/tier-list/components/ImageUpload.tsx`
@@ -137,6 +148,7 @@ pnpm add -D @typescript-eslint/eslint-plugin@latest @typescript-eslint/parser@la
   - `src/features/tier-list/components/TierListGallery.tsx`
 
 ### 5.2 tailwind-merge v3 Changes
+
 - [ ] Check `src/lib/utils.ts` - `cn()` function compatibility
 
 ---
@@ -160,6 +172,7 @@ pnpm add -D @typescript-eslint/eslint-plugin@latest @typescript-eslint/parser@la
 ## Rollback Strategy
 
 If issues occur:
+
 ```bash
 git checkout HEAD -- package.json pnpm-lock.yaml
 pnpm install

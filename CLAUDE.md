@@ -20,60 +20,79 @@ Tier Maker is a modern web application for creating and sharing tier-based ranki
 - **Image Processing**: Client-side Base64 compression
 - **Export**: html2canvas for PNG export
 - **Form Handling**: React Hook Form with Zod validation
+- **Testing**: Vitest + React Testing Library (unit), Playwright (E2E)
 
 ## Commands
 
 ```bash
-pnpm dev      # Start development server with Turbopack
-pnpm build    # Build for production
-pnpm start    # Start production server
-pnpm lint     # Run ESLint
+pnpm dev          # Start development server with Turbopack
+pnpm build        # Build for production
+pnpm start        # Start production server
+pnpm lint         # Run ESLint
+pnpm format       # Format code with Prettier
+pnpm test         # Run unit tests (watch mode)
+pnpm test:run     # Run unit tests once
+pnpm test:e2e     # Run E2E tests (Playwright)
+pnpm test:e2e:ui  # Run E2E tests with UI
 ```
 
 ## Project Structure
 
 ```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── page.tsx            # Landing page with hero section
-│   ├── editor/[id]/        # Dynamic tier list editor route
-│   │   └── page.tsx        # Editor page component
-│   ├── tiers/              # Tier lists gallery
-│   │   └── page.tsx        # Gallery page component
-│   ├── layout.tsx          # Root layout with providers
-│   ├── globals.css         # Global styles
-│   └── not-found.tsx       # 404 page
-├── features/               # Feature-based modules
-│   └── tier-list/          # Tier list feature
-│       ├── components/     # Feature components
-│       │   ├── TierListEditor.tsx  # Main editor with DND context
-│       │   ├── TierListGallery.tsx # Gallery of saved tier lists
-│       │   ├── TierListCard.tsx    # Card for gallery display
-│       │   ├── TierRow.tsx         # Tier row (droppable)
-│       │   ├── TierItem.tsx        # Draggable item
-│       │   ├── ItemPool.tsx        # Unassigned items pool
-│       │   ├── ImageUpload.tsx     # Drag & drop image upload
-│       │   ├── ExportButton.tsx    # Export to PNG
-│       │   └── EmptyState.tsx      # Empty state component
-│       ├── store/          # Zustand store
-│       │   ├── tier-store.ts
-│       │   └── index.ts
-│       ├── constants.ts    # Tier levels and colors
-│       └── index.ts        # Public API and type exports
-├── components/
-│   ├── ui/                 # shadcn/ui components
-│   ├── landing/            # Landing page components
-│   │   └── HeroSection.tsx
-│   ├── layout/             # Layout components (Header)
-│   ├── providers/          # Context providers (theme)
-│   └── theme-toggle.tsx    # Dark/light mode toggle
-└── lib/
-    └── utils.ts            # Utility functions (cn helper)
+├── e2e/                    # Playwright E2E tests
+│   ├── navigation.spec.ts  # Navigation tests
+│   ├── tier-list.spec.ts   # Tier list creation tests
+│   ├── editor.spec.ts      # Editor interaction tests
+│   ├── gallery.spec.ts     # Gallery management tests
+│   └── persistence.spec.ts # localStorage persistence tests
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   │   ├── page.tsx            # Landing page with hero section
+│   │   ├── editor/[id]/        # Dynamic tier list editor route
+│   │   │   └── page.tsx        # Editor page component
+│   │   ├── tiers/              # Tier lists gallery
+│   │   │   └── page.tsx        # Gallery page component
+│   │   ├── layout.tsx          # Root layout with providers
+│   │   ├── globals.css         # Global styles
+│   │   └── not-found.tsx       # 404 page
+│   ├── features/               # Feature-based modules
+│   │   └── tier-list/          # Tier list feature
+│   │       ├── components/     # Feature components
+│   │       │   ├── TierListEditor.tsx  # Main editor with DND context
+│   │       │   ├── TierListGallery.tsx # Gallery of saved tier lists
+│   │       │   ├── TierListCard.tsx    # Card for gallery display
+│   │       │   ├── TierRow.tsx         # Tier row (droppable)
+│   │       │   ├── TierItem.tsx        # Draggable item
+│   │       │   ├── ItemPool.tsx        # Unassigned items pool
+│   │       │   ├── ImageUpload.tsx     # Drag & drop image upload
+│   │       │   ├── ExportButton.tsx    # Export to PNG
+│   │       │   └── EmptyState.tsx      # Empty state component
+│   │       ├── hooks/          # Custom hooks
+│   │       │   └── useTierListDnd.ts   # DND logic extracted from editor
+│   │       ├── store/          # Zustand store
+│   │       │   ├── tier-store.ts
+│   │       │   └── index.ts
+│   │       ├── constants.ts    # Tier levels and colors
+│   │       └── index.ts        # Public API and type exports
+│   ├── components/
+│   │   ├── ui/                 # shadcn/ui components
+│   │   ├── landing/            # Landing page components
+│   │   │   └── HeroSection.tsx
+│   │   ├── layout/             # Layout components (Header)
+│   │   ├── providers/          # Context providers (theme)
+│   │   └── theme-toggle.tsx    # Dark/light mode toggle
+│   ├── lib/
+│   │   └── utils.ts            # Utility functions (cn, getContrastColor)
+│   └── test/
+│       └── setup.ts            # Vitest setup with testing-library
+├── playwright.config.ts    # Playwright configuration
+└── vitest.config.ts        # Vitest configuration
 ```
 
 ## Architecture
 
 ### Data Flow
+
 ```
 Images → Base64 compression → Zustand store → localStorage
 Drag & Drop → DND Kit → moveItem action → State update
@@ -81,6 +100,7 @@ Export → html2canvas → PNG download
 ```
 
 ### Key Store Actions
+
 - `createList(title)`: Initialize new tier list
 - `addItem(item)`: Add item to unassigned pool
 - `moveItem(itemId, source, target)`: Move between tiers/pool
@@ -88,6 +108,7 @@ Export → html2canvas → PNG download
 - `clearAllItems()`: Reset all items
 
 ### Key Types
+
 - `TierItem`: { id, name, imageUrl?, description?, createdAt, updatedAt }
 - `TierRow`: { id, level, color, items[], name? }
 - `TierList`: { id, title, rows[], unassignedItems[], ... }
@@ -118,6 +139,7 @@ App Layout
 ## Future Enhancements (Phase 2)
 
 When backend is needed:
+
 1. Supabase Auth for user accounts
 2. Cloudflare R2 for image storage (zero egress fees)
 3. Share tier lists via URL
@@ -126,6 +148,7 @@ When backend is needed:
 ## ESLint Configuration
 
 TypeScript ESLint with warnings (not errors) for:
+
 - `@typescript-eslint/no-explicit-any`
 - `@typescript-eslint/no-unused-vars`
 - `@typescript-eslint/no-empty-interface`

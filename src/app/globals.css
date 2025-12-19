@@ -13,15 +13,15 @@ body {
 
 /* Smooth Scrolling & Scrollbar Styles */
 ::-webkit-scrollbar {
-  @apply w-2 h-2;
+  @apply h-2 w-2;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-muted/50 rounded-full;
+  @apply rounded-full bg-muted/50;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary/40 rounded-full transition-colors hover:bg-primary/70;
+  @apply rounded-full bg-primary/40 transition-colors hover:bg-primary/70;
 }
 
 ::-webkit-scrollbar-corner {
@@ -139,11 +139,11 @@ body {
   }
 
   .brand-gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#3293CE] via-[#2F8CCA] to-[#30489C];
+    @apply bg-gradient-to-r from-[#3293CE] via-[#2F8CCA] to-[#30489C] bg-clip-text text-transparent;
   }
 
   .brand-gradient-hover {
-    @apply hover:bg-gradient-to-r hover:from-[#3293CE] hover:via-[#2F8CCA] hover:to-[#30489C] transition-all duration-300;
+    @apply transition-all duration-300 hover:bg-gradient-to-r hover:from-[#3293CE] hover:via-[#2F8CCA] hover:to-[#30489C];
   }
 
   .brand-gradient-border {

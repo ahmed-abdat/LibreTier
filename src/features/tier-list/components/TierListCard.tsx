@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MoreVertical, Edit3, Copy, Trash2, Clock, Image as ImageIcon } from "lucide-react";
+import {
+  MoreVertical,
+  Edit3,
+  Copy,
+  Trash2,
+  Clock,
+  Image as ImageIcon,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { TierList } from "../index";
@@ -56,9 +63,10 @@ export function TierListCard({
     .slice(0, 4);
 
   // Format the date
-  const updatedAt = tierList.updatedAt instanceof Date
-    ? tierList.updatedAt
-    : new Date(tierList.updatedAt);
+  const updatedAt =
+    tierList.updatedAt instanceof Date
+      ? tierList.updatedAt
+      : new Date(tierList.updatedAt);
   const timeAgo = formatDistanceToNow(updatedAt, { addSuffix: true });
 
   return (
@@ -76,15 +84,15 @@ export function TierListCard({
         <div
           onClick={onSelect}
           className={cn(
-            "relative overflow-hidden rounded-xl border bg-card cursor-pointer transition-all duration-300",
-            "hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10",
+            "relative cursor-pointer overflow-hidden rounded-xl border bg-card transition-all duration-300",
+            "hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5",
             "active:scale-[0.98]"
           )}
         >
           {/* Preview Section */}
-          <div className="relative h-36 bg-gradient-to-br from-muted/50 to-muted overflow-hidden">
+          <div className="relative h-36 overflow-hidden rounded-t-xl bg-gradient-to-br from-muted/50 to-muted">
             {previewImages.length > 0 ? (
-              <div className="absolute inset-0 grid grid-cols-2 gap-0.5 p-0.5">
+              <div className="absolute inset-0 grid grid-cols-2 gap-0.5 overflow-hidden rounded-t-xl">
                 {previewImages.map((item, i) => (
                   <motion.div
                     key={item.id}
@@ -93,40 +101,46 @@ export function TierListCard({
                     transition={{ delay: index * 0.05 + i * 0.05 }}
                     className={cn(
                       "relative overflow-hidden",
-                      previewImages.length === 1 && "col-span-2 row-span-2",
+                      previewImages.length === 1 &&
+                        "col-span-2 row-span-2 rounded-t-xl",
                       previewImages.length === 2 && "row-span-2",
-                      previewImages.length === 3 && i === 0 && "row-span-2"
+                      previewImages.length === 2 && i === 0 && "rounded-tl-xl",
+                      previewImages.length === 2 && i === 1 && "rounded-tr-xl",
+                      previewImages.length >= 3 &&
+                        i === 0 &&
+                        "row-span-2 rounded-tl-xl",
+                      previewImages.length >= 3 && i === 1 && "rounded-tr-xl"
                     )}
                   >
                     <img
                       src={item.imageUrl}
                       alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                   </motion.div>
                 ))}
               </div>
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground/40">
-                <ImageIcon className="w-12 h-12 mb-2" />
+                <ImageIcon className="mb-2 h-12 w-12" />
                 <span className="text-sm">No images yet</span>
               </div>
             )}
 
             {/* Tier preview strip at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 h-6 flex overflow-hidden">
+            <div className="absolute bottom-0 left-0 right-0 flex h-6 overflow-hidden">
               {tierList.rows.slice(0, 5).map((row) => (
                 <motion.div
                   key={row.id}
                   style={{ backgroundColor: row.color }}
-                  className="flex-1 flex items-center justify-center min-w-[2rem]"
+                  className="flex min-w-[2rem] flex-1 items-center justify-center"
                   initial={{ y: 24 }}
                   animate={{ y: isHovered ? 0 : 24 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <span className="text-[10px] font-bold text-black/70 truncate px-1">
+                  <span className="truncate px-1 text-[10px] font-bold text-black/70">
                     {row.name || row.level}
                   </span>
                 </motion.div>
@@ -135,21 +149,23 @@ export function TierListCard({
           </div>
 
           {/* Content Section */}
-          <div className="p-4 space-y-3">
+          <div className="space-y-3 p-4">
             {/* Title */}
-            <h3 className="font-semibold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">
+            <h3 className="line-clamp-1 text-lg font-semibold leading-tight transition-colors group-hover:text-primary">
               {tierList.title}
             </h3>
 
             {/* Meta info */}
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" />
+                <Clock className="h-3.5 w-3.5" />
                 <span>{timeAgo}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5" />
-                <span>{totalItems} items</span>
+                <ImageIcon className="h-3.5 w-3.5" />
+                <span>
+                  {totalItems} {totalItems === 1 ? "item" : "items"}
+                </span>
               </div>
             </div>
 
@@ -160,8 +176,8 @@ export function TierListCard({
                 return (
                   <div
                     key={row.id}
-                    className="relative group/tier"
-                    title={`${row.name || row.level}: ${itemCount} items`}
+                    className="group/tier relative"
+                    title={`${row.name || row.level}: ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
                   >
                     <div
                       className={cn(
@@ -170,7 +186,10 @@ export function TierListCard({
                       )}
                       style={{
                         backgroundColor: row.color,
-                        width: itemCount > 0 ? `${Math.min(itemCount * 8 + 8, 48)}px` : undefined,
+                        width:
+                          itemCount > 0
+                            ? `${Math.min(itemCount * 8 + 8, 48)}px`
+                            : undefined,
                         opacity: itemCount > 0 ? 1 : 0.3,
                       }}
                     />
@@ -184,7 +203,7 @@ export function TierListCard({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered ? 1 : 0 }}
-            className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/5 to-transparent"
           />
         </div>
 
@@ -195,7 +214,7 @@ export function TierListCard({
               variant="secondary"
               size="icon"
               className={cn(
-                "absolute top-2 right-2 h-8 w-8 rounded-full shadow-md transition-all duration-200",
+                "absolute right-2 top-2 h-8 w-8 rounded-full shadow-md transition-all duration-200",
                 // Always visible on touch devices, hover-reveal on desktop
                 "opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100",
                 "bg-background/90 hover:bg-background"
@@ -232,8 +251,8 @@ export function TierListCard({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Tier List?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{tierList.title}&quot;? This action
-              cannot be undone.
+              Are you sure you want to delete &quot;{tierList.title}&quot;? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

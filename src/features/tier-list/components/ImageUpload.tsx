@@ -6,7 +6,12 @@ import { Upload, Image as ImageIcon, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTierStore } from "../store";
 import { toast } from "sonner";
-import { IMAGE_MAX_WIDTH, IMAGE_MAX_HEIGHT, IMAGE_QUALITY } from "../constants";
+import {
+  IMAGE_MAX_WIDTH,
+  IMAGE_MAX_HEIGHT,
+  IMAGE_QUALITY,
+  MAX_FILE_SIZE,
+} from "../constants";
 
 interface ImageUploadProps {
   className?: string;
@@ -71,7 +76,10 @@ export function ImageUpload({ className }: ImageUploadProps) {
 
   // Check if an image already exists in the tier list
   const checkForDuplicate = useCallback(
-    (base64: string, fileName: string): { isDuplicate: boolean; existingName?: string } => {
+    (
+      base64: string,
+      fileName: string
+    ): { isDuplicate: boolean; existingName?: string } => {
       const currentList = getCurrentList();
       if (!currentList) return { isDuplicate: false };
 
@@ -89,7 +97,10 @@ export function ImageUpload({ className }: ImageUploadProps) {
           const newData = base64.split(",")[1] || "";
 
           // If the data matches or file names match, it's likely a duplicate
-          if (existingData === newData || item.name.toLowerCase() === fileName.toLowerCase()) {
+          if (
+            existingData === newData ||
+            item.name.toLowerCase() === fileName.toLowerCase()
+          ) {
             return { isDuplicate: true, existingName: item.name };
           }
         }
@@ -108,14 +119,33 @@ export function ImageUpload({ className }: ImageUploadProps) {
         return;
       }
 
+      // Filter out files that exceed size limit
+      const oversizedFiles = acceptedFiles.filter(
+        (f) => f.size > MAX_FILE_SIZE
+      );
+      const validFiles = acceptedFiles.filter((f) => f.size <= MAX_FILE_SIZE);
+
+      if (oversizedFiles.length > 0) {
+        const maxSizeMB = MAX_FILE_SIZE / (1024 * 1024);
+        toast.error(
+          `${oversizedFiles.length} file(s) exceed ${maxSizeMB}MB limit: ${oversizedFiles.map((f) => f.name).join(", ")}`
+        );
+      }
+
+      if (validFiles.length === 0) {
+        return;
+      }
+
       setIsProcessing(true);
-      const toastId = toast.loading(`Processing ${acceptedFiles.length} image(s)...`);
+      const toastId = toast.loading(
+        `Processing ${validFiles.length} image(s)...`
+      );
 
       const failedFiles: { name: string; error: string }[] = [];
       const duplicateFiles: { name: string; existingName: string }[] = [];
       let successCount = 0;
 
-      for (const file of acceptedFiles) {
+      for (const file of validFiles) {
         try {
           const base64 = await processImage(file);
           const name = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
@@ -124,7 +154,10 @@ export function ImageUpload({ className }: ImageUploadProps) {
           const { isDuplicate, existingName } = checkForDuplicate(base64, name);
 
           if (isDuplicate) {
-            duplicateFiles.push({ name: file.name, existingName: existingName || name });
+            duplicateFiles.push({
+              name: file.name,
+              existingName: existingName || name,
+            });
           }
 
           // Always add the item (user might want duplicates intentionally)
@@ -175,43 +208,56 @@ export function ImageUpload({ className }: ImageUploadProps) {
   return (
     <div
       {...getRootProps()}
+      role="button"
+      tabIndex={0}
+      aria-label="Upload images by dropping files or clicking to browse"
+      aria-busy={isProcessing}
       className={cn(
-        "relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 group overflow-hidden",
+        "group relative cursor-pointer overflow-hidden rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200",
         isDragActive
-          ? "border-primary bg-primary/10 scale-[1.02]"
+          ? "scale-[1.02] border-primary bg-primary/10"
           : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30",
-        isProcessing && "opacity-50 cursor-wait",
+        isProcessing && "cursor-wait opacity-50",
         className
       )}
     >
-      <input {...getInputProps()} />
+      <input {...getInputProps()} aria-hidden="true" />
 
       {/* Animated background pattern */}
-      <div className={cn(
-        "absolute inset-0 opacity-0 transition-opacity duration-300",
-        isDragActive && "opacity-100"
-      )}>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent animate-pulse" />
+      <div
+        className={cn(
+          "absolute inset-0 opacity-0 transition-opacity duration-300",
+          isDragActive && "opacity-100"
+        )}
+      >
+        <div className="absolute inset-0 animate-pulse bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
       </div>
 
       <div className="relative flex flex-col items-center gap-3">
         {isDragActive ? (
           <>
             <div className="relative">
-              <ImageIcon className="h-12 w-12 text-primary animate-bounce" />
-              <Plus className="absolute -right-1 -top-1 h-5 w-5 text-primary bg-background rounded-full" />
+              <ImageIcon className="h-12 w-12 animate-bounce text-primary" />
+              <Plus className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-background text-primary" />
             </div>
-            <p className="text-sm text-primary font-semibold">Drop images here</p>
+            <p className="text-sm font-semibold text-primary">
+              Drop images here
+            </p>
           </>
         ) : isProcessing ? (
-          <>
-            <div className="h-12 w-12 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-muted-foreground font-medium">Processing...</p>
-          </>
+          <div role="status" aria-live="polite">
+            <div
+              className="h-12 w-12 animate-spin rounded-full border-2 border-primary border-t-transparent"
+              aria-label="Processing images"
+            />
+            <p className="mt-3 text-sm font-medium text-muted-foreground">
+              Processing...
+            </p>
+          </div>
         ) : (
           <>
             <div className="relative">
-              <Upload className="h-12 w-12 text-muted-foreground group-hover:text-primary transition-colors duration-200 group-hover:scale-110 transform" />
+              <Upload className="h-12 w-12 transform text-muted-foreground transition-colors duration-200 group-hover:scale-110 group-hover:text-primary" />
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium text-foreground">

@@ -34,7 +34,9 @@ export function ThemeToggle({
     setMounted(true);
     // Initialize from localStorage or system preference
     const stored = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
     const isDarkMode = stored === "dark" || (!stored && prefersDark);
     setIsDark(isDarkMode);
 
@@ -102,7 +104,7 @@ export function ThemeToggle({
       <Button
         variant="outline"
         size="icon"
-        className={cn("bg-background relative overflow-hidden", className)}
+        className={cn("relative overflow-hidden bg-background", className)}
         disabled
       >
         <span className="sr-only">Toggle theme</span>
@@ -116,10 +118,7 @@ export function ThemeToggle({
       variant="outline"
       size="icon"
       onClick={toggleTheme}
-      className={cn(
-        "bg-background relative overflow-hidden group",
-        className
-      )}
+      className={cn("group relative overflow-hidden bg-background", className)}
       {...props}
     >
       <Sun

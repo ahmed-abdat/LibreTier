@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Slider as SliderPrimitive } from "radix-ui";
+import * as SliderPrimitive from "@radix-ui/react-slider";
 import { cn } from "@/lib/utils";
 
-interface SliderProps
-  extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
+interface SliderProps extends React.ComponentPropsWithoutRef<
+  typeof SliderPrimitive.Root
+> {
   min: number;
   max: number;
   step?: number;
@@ -36,7 +37,7 @@ const Slider = React.forwardRef<
     };
 
     return (
-      <div className="w-full relative">
+      <div className="relative w-full">
         <SliderPrimitive.Root
           ref={ref}
           className={cn(
@@ -56,7 +57,7 @@ const Slider = React.forwardRef<
 
           {/* Thumb 1 with Label */}
           <div
-            className="absolute -translate-x-1/2 -bottom-8 text-xs font-medium text-foreground"
+            className="absolute -bottom-8 -translate-x-1/2 text-xs font-medium text-foreground"
             style={{
               left: `${((values[0] - min) / (max - min)) * 100}%`,
             }}
@@ -67,7 +68,7 @@ const Slider = React.forwardRef<
 
           {/* Thumb 2 with Label */}
           <div
-            className="absolute -translate-x-1/2 -bottom-8 text-xs font-medium text-foreground"
+            className="absolute -bottom-8 -translate-x-1/2 text-xs font-medium text-foreground"
             style={{
               left: `${((values[1] - min) / (max - min)) * 100}%`,
             }}

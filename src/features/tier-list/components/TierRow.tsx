@@ -8,8 +8,14 @@ import {
   SortableContext,
   horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { GripVertical, Settings2, Trash2, RotateCcw, Pencil } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  GripVertical,
+  Settings2,
+  Trash2,
+  RotateCcw,
+  Pencil,
+} from "lucide-react";
+import { cn, getContrastColor } from "@/lib/utils";
 import { TierRow as TierRowType } from "../index";
 import { TierItem } from "./TierItem";
 import { Button } from "@/components/ui/button";
@@ -31,13 +37,12 @@ interface TierRowProps {
   isRowOverlay?: boolean;
 }
 
-
 export function TierRow({
   row,
   isExporting,
   isOver: isOverProp,
   isRowDragging,
-  isRowOverlay
+  isRowOverlay,
 }: TierRowProps) {
   const updateTier = useTierStore((state) => state.updateTier);
   const deleteTier = useTierStore((state) => state.deleteTier);
@@ -92,13 +97,15 @@ export function TierRow({
   });
 
   // Droppable for items
-  const { setNodeRef: setDroppableRef, isOver: isDroppableOver } = useDroppable({
-    id: `tier-${row.id}`,
-    data: {
-      type: "tier",
-      tierId: row.id,
-    },
-  });
+  const { setNodeRef: setDroppableRef, isOver: isDroppableOver } = useDroppable(
+    {
+      id: `tier-${row.id}`,
+      data: {
+        type: "tier",
+        tierId: row.id,
+      },
+    }
+  );
 
   const itemIds = row.items.map((item) => item.id);
   const showDropHighlight = isOverProp || isDroppableOver;
@@ -109,35 +116,27 @@ export function TierRow({
     WebkitTouchCallout: "none",
   };
 
-  // Helper function to determine if text should be dark or light based on background
-  const getContrastColor = (hexColor: string) => {
-    const hex = hexColor.replace("#", "");
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    // Using relative luminance formula
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance > 0.5 ? "#000000" : "#ffffff";
-  };
-
   const textColor = getContrastColor(row.color);
 
   // Row overlay when dragging
   if (isRowOverlay) {
     return (
-      <div className="flex border-2 border-primary rounded-lg shadow-2xl bg-background opacity-95">
+      <div className="flex rounded-lg border-2 border-primary bg-background opacity-95 shadow-2xl">
         {/* Drag Handle */}
-        <div className="w-10 sm:w-8 flex items-center justify-center bg-muted/50 border-r cursor-grabbing">
-          <GripVertical className="h-6 w-6 sm:h-5 sm:w-5 text-primary" />
+        <div className="flex w-10 cursor-grabbing items-center justify-center border-r bg-muted/50 sm:w-8">
+          <GripVertical className="h-6 w-6 text-primary sm:h-5 sm:w-5" />
         </div>
 
         {/* Tier Label */}
         <div
-          className="w-16 sm:w-24 min-w-[4rem] sm:min-w-[6rem] flex items-center justify-center font-bold text-lg sm:text-xl shrink-0"
-          style={{ backgroundColor: row.color }}
+          className="flex w-16 min-w-[4rem] shrink-0 items-center justify-center font-bold sm:w-24 sm:min-w-[6rem]"
+          style={{
+            backgroundColor: row.color,
+            fontSize: `${row.labelFontSize || 16}px`,
+          }}
         >
           <span
-            className="drop-shadow-sm select-none"
+            className="select-none drop-shadow-sm"
             style={{ color: textColor }}
           >
             {row.name || row.level}
@@ -145,20 +144,20 @@ export function TierRow({
         </div>
 
         {/* Tier Content */}
-        <div className="flex-1 min-h-[5rem] p-2 flex flex-wrap gap-2 items-start content-start bg-muted/20">
+        <div className="flex min-h-[5rem] flex-1 flex-wrap content-start items-start gap-2 bg-muted/20 p-2">
           {row.items.map((item) => (
             <div
               key={item.id}
-              className="w-[72px] h-[72px] rounded-lg overflow-hidden bg-muted"
+              className="h-[72px] w-[72px] overflow-hidden rounded-lg bg-muted"
             >
               {item.imageUrl ? (
                 <img
                   src={item.imageUrl}
                   alt={item.name}
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[10px] text-center p-1.5 font-medium bg-secondary text-secondary-foreground">
+                <div className="flex h-full w-full items-center justify-center bg-secondary p-1.5 text-center text-[10px] font-medium text-secondary-foreground">
                   {item.name}
                 </div>
               )}
@@ -174,8 +173,8 @@ export function TierRow({
       ref={setSortableRef}
       style={style}
       className={cn(
-        "flex border-b border-border last:border-b-0 transition-all duration-200",
-        isDragging && "opacity-50 bg-muted/50",
+        "flex border-b border-border transition-all duration-200 last:border-b-0",
+        isDragging && "bg-muted/50 opacity-50",
         isRowDragging && !isDragging && "translate-y-0"
       )}
     >
@@ -184,25 +183,31 @@ export function TierRow({
         <div
           {...attributes}
           {...listeners}
+          role="button"
+          aria-label={`Drag to reorder tier ${row.name || row.level}`}
+          aria-roledescription="draggable"
           data-drag-handle
           className={cn(
-            "w-10 sm:w-8 flex items-center justify-center bg-muted/20 border-r border-border cursor-grab active:cursor-grabbing",
-            "hover:bg-primary/10 active:bg-primary/20 transition-all duration-150 group/handle",
+            "flex w-10 cursor-grab items-center justify-center border-r border-border bg-muted/20 active:cursor-grabbing sm:w-8",
+            "group/handle transition-all duration-150 hover:bg-primary/10 active:bg-primary/20",
             "touch-none select-none"
           )}
           title="Drag to reorder"
         >
-          <GripVertical className="h-6 w-6 sm:h-5 sm:w-5 text-muted-foreground/50 group-hover/handle:text-primary transition-colors" />
+          <GripVertical className="h-6 w-6 text-muted-foreground/50 transition-colors group-hover/handle:text-primary sm:h-5 sm:w-5" />
         </div>
       )}
 
       {/* Tier Label */}
       <div
         className={cn(
-          "w-16 sm:w-24 min-w-[4rem] sm:min-w-[6rem] flex items-center justify-center font-bold text-lg sm:text-xl shrink-0 relative group",
-          isExporting && "w-24 min-w-[6rem] text-xl"
+          "group relative flex w-16 min-w-[4rem] shrink-0 items-center justify-center font-bold sm:w-24 sm:min-w-[6rem]",
+          isExporting && "w-24 min-w-[6rem]"
         )}
-        style={{ backgroundColor: row.color }}
+        style={{
+          backgroundColor: row.color,
+          fontSize: `${row.labelFontSize || 16}px`,
+        }}
       >
         {/* Inline editable tier name */}
         {isEditing && !isExporting ? (
@@ -213,22 +218,25 @@ export function TierRow({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="w-full h-full bg-transparent text-center font-bold text-xl outline-none border-2 border-white/50 rounded px-1"
-            style={{ color: textColor }}
-            maxLength={10}
+            className="h-full w-full rounded border-2 border-white/50 bg-transparent px-1 text-center font-bold outline-none"
+            style={{
+              color: textColor,
+              fontSize: `${row.labelFontSize || 16}px`,
+            }}
+            maxLength={50}
           />
         ) : (
           <button
             onClick={() => !isExporting && setIsEditing(true)}
             className={cn(
-              "relative flex items-center justify-center w-full h-full cursor-text group/label",
-              !isExporting && "hover:bg-black/10 transition-colors"
+              "group/label relative flex h-full w-full cursor-text items-center justify-center",
+              !isExporting && "transition-colors hover:bg-black/10"
             )}
             title={!isExporting ? "Click to edit tier name" : undefined}
             aria-label={`Edit tier name: ${row.name || row.level}`}
           >
             <span
-              className="drop-shadow-sm select-none"
+              className="select-none drop-shadow-sm"
               style={{ color: textColor }}
             >
               {row.name || row.level}
@@ -236,7 +244,7 @@ export function TierRow({
             {/* Edit hint icon - shows on hover */}
             {!isExporting && (
               <Pencil
-                className="absolute bottom-1 right-1 h-3 w-3 opacity-0 group-hover/label:opacity-60 transition-opacity"
+                className="absolute bottom-1 right-1 h-3 w-3 opacity-0 transition-opacity group-hover/label:opacity-60"
                 style={{ color: textColor }}
               />
             )}
@@ -250,28 +258,59 @@ export function TierRow({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label={`Settings for tier ${row.name || row.level}`}
                 className={cn(
-                  "absolute top-1 right-1 h-8 w-8 sm:h-6 sm:w-6 rounded-full",
-                  "bg-black/40 hover:bg-black/60 hover:scale-110 active:scale-95",
+                  "absolute right-1 top-1 h-8 w-8 rounded-full sm:h-6 sm:w-6",
+                  "bg-black/40 hover:scale-110 hover:bg-black/60 active:scale-95",
                   "border border-white/30 shadow-sm",
                   // Always visible on touch devices, hover-reveal on desktop
                   "opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100",
                   "transition-all duration-200"
                 )}
               >
-                <Settings2 className="h-4 w-4 sm:h-3 sm:w-3 text-white" />
+                <Settings2
+                  className="h-4 w-4 text-white sm:h-3 sm:w-3"
+                  aria-hidden="true"
+                />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64" align="start" side="right">
               <div className="space-y-4">
                 <div className="space-y-2">
+                  <Label>Label Font Size: {row.labelFontSize || 16}px</Label>
+                  <input
+                    type="range"
+                    min="12"
+                    max="32"
+                    step="1"
+                    value={row.labelFontSize || 16}
+                    onChange={(e) => {
+                      updateTier(row.id, {
+                        labelFontSize: parseInt(e.target.value, 10),
+                      });
+                    }}
+                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
+                  />
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>12px</span>
+                    <span>32px</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
                   <Label>Color</Label>
-                  <div className="flex flex-wrap gap-2">
+                  <div
+                    className="flex flex-wrap gap-2"
+                    role="radiogroup"
+                    aria-label="Preset colors"
+                  >
                     {PRESET_COLORS.map((color) => (
                       <button
                         key={color}
+                        role="radio"
+                        aria-checked={row.color === color}
+                        aria-label={`Select color ${color}`}
                         className={cn(
-                          "w-7 h-7 rounded-md border-2 transition-all hover:scale-110",
+                          "h-7 w-7 rounded-md border-2 transition-all hover:scale-110",
                           row.color === color
                             ? "border-primary ring-2 ring-primary/30"
                             : "border-transparent hover:border-muted-foreground/50"
@@ -288,14 +327,16 @@ export function TierRow({
                       onChange={(e) =>
                         updateTier(row.id, { color: e.target.value })
                       }
-                      className="w-12 h-8 p-1 cursor-pointer"
+                      className="h-8 w-12 cursor-pointer p-1"
                     />
-                    <span className="text-xs text-muted-foreground">Custom color</span>
+                    <span className="text-xs text-muted-foreground">
+                      Custom color
+                    </span>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="pt-2 border-t space-y-2">
+                <div className="space-y-2 border-t pt-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -309,7 +350,7 @@ export function TierRow({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => deleteTier(row.id)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -326,13 +367,16 @@ export function TierRow({
       <div
         ref={setDroppableRef}
         className={cn(
-          "flex-1 min-h-[5rem] p-2 flex flex-wrap gap-2 items-start content-start transition-all duration-200",
+          "flex min-h-[5rem] flex-1 flex-wrap content-start items-start gap-2 p-2 transition-all duration-200",
           showDropHighlight
             ? "bg-primary/10 ring-2 ring-inset ring-primary/40"
             : "bg-muted/20"
         )}
       >
-        <SortableContext items={itemIds} strategy={horizontalListSortingStrategy}>
+        <SortableContext
+          items={itemIds}
+          strategy={horizontalListSortingStrategy}
+        >
           {row.items.map((item) => (
             <TierItem key={item.id} item={item} containerId={row.id} />
           ))}
@@ -340,7 +384,7 @@ export function TierRow({
 
         {/* Only show drop hint during drag, never during export */}
         {row.items.length === 0 && showDropHighlight && !isExporting && (
-          <div className="w-full h-full min-h-[3.5rem] flex items-center justify-center text-sm text-primary font-medium animate-pulse">
+          <div className="flex h-full min-h-[3.5rem] w-full animate-pulse items-center justify-center text-sm font-medium text-primary">
             Drop here
           </div>
         )}

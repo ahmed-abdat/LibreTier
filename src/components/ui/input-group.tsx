@@ -46,8 +46,7 @@ const InputGroupText = React.forwardRef<HTMLDivElement, InputGroupTextProps>(
 );
 InputGroupText.displayName = "InputGroupText";
 
-interface InputGroupInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputGroupInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   type?: string;
 }
 

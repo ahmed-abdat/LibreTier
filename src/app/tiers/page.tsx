@@ -2,24 +2,18 @@
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TierListGallery } from "@/features/tier-list/components";
-import Image from "next/image";
+import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
 
 export default function TiersPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-background via-background to-muted/20">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto max-w-6xl flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <Image
-              src="/tier_list_logo.png"
-              alt="Tier List Logo"
-              width={44}
-              height={44}
-              className="rounded-lg shadow-lg group-hover:shadow-xl transition-shadow"
-            />
-            <span className="text-xl font-bold tracking-tight">Tier List</span>
+        <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Logo size={40} priority />
+            <span className="text-xl font-bold">Tier List</span>
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -28,7 +22,7 @@ export default function TiersPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+      <main className="container mx-auto max-w-6xl flex-1 px-4 py-8">
         <TierListGallery />
       </main>
 
