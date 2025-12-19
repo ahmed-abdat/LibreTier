@@ -34,45 +34,66 @@ export function EmptyState({ onCreateNew }: EmptyStateProps) {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col items-center justify-center flex-1 min-h-[60vh] px-4 py-12"
+      className="flex min-h-[60vh] flex-1 flex-col items-center justify-center px-4 py-12"
     >
       {/* Animated illustration */}
       <motion.div variants={itemVariants} className="relative mb-8">
         {/* Background glow */}
-        <div className="absolute inset-0 bg-primary/10 blur-[60px] rounded-full scale-150" />
+        <div className="absolute inset-0 scale-150 rounded-full bg-primary/10 blur-[60px]" />
 
         {/* Stacked cards illustration */}
         <div className="relative">
           <motion.div
             initial={{ rotate: -6, scale: 0.95 }}
             animate={{ rotate: -4, scale: 1 }}
-            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-            className="absolute -left-4 -top-2 w-20 h-14 sm:w-24 sm:h-16 rounded-xl bg-gradient-to-br from-[#FFBF7F] to-[#FF9F5F] shadow-lg"
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            }}
+            className="absolute -left-4 -top-2 h-14 w-20 rounded-xl bg-gradient-to-br from-[#FFBF7F] to-[#FF9F5F] shadow-lg sm:h-16 sm:w-24"
           />
           <motion.div
             initial={{ rotate: 4, scale: 0.98 }}
             animate={{ rotate: 6, scale: 1 }}
-            transition={{ duration: 2.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 0.15 }}
-            className="absolute -right-4 -top-1 w-20 h-14 sm:w-24 sm:h-16 rounded-xl bg-gradient-to-br from-[#7FFF7F] to-[#5FDF5F] shadow-lg"
+            transition={{
+              duration: 2.2,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+              delay: 0.15,
+            }}
+            className="absolute -right-4 -top-1 h-14 w-20 rounded-xl bg-gradient-to-br from-[#7FFF7F] to-[#5FDF5F] shadow-lg sm:h-16 sm:w-24"
           />
           <motion.div
             initial={{ y: 0 }}
             animate={{ y: -3 }}
-            transition={{ duration: 1.8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 0.3 }}
-            className="relative w-24 h-16 sm:w-28 sm:h-20 rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-xl flex items-center justify-center"
+            transition={{
+              duration: 1.8,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+              delay: 0.3,
+            }}
+            className="relative flex h-16 w-24 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-xl sm:h-20 sm:w-28"
           >
-            <Layers className="w-8 h-8 sm:w-10 sm:h-10 text-white/90" />
+            <Layers className="h-8 w-8 text-white/90 sm:h-10 sm:w-10" />
           </motion.div>
         </div>
       </motion.div>
 
       {/* Text content */}
-      <motion.div variants={itemVariants} className="text-center space-y-3 max-w-md mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+      <motion.div
+        variants={itemVariants}
+        className="mb-8 max-w-md space-y-3 text-center"
+      >
+        <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
           Create Your First Tier List
         </h2>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Rank anything with customizable tier lists. Upload images, drag to organize, and share with friends.
+        <p className="text-sm text-muted-foreground sm:text-base">
+          Rank anything with customizable tier lists. Upload images, drag to
+          organize, and share with friends.
         </p>
       </motion.div>
 
@@ -81,9 +102,9 @@ export function EmptyState({ onCreateNew }: EmptyStateProps) {
         <Button
           size="lg"
           onClick={onCreateNew}
-          className="gap-2 group shadow-lg hover:shadow-xl hover:shadow-primary/25 px-6 sm:px-8 py-6 text-base sm:text-lg font-semibold rounded-xl"
+          className="group gap-2 rounded-xl px-6 py-6 text-base font-semibold shadow-lg hover:shadow-xl hover:shadow-primary/25 sm:px-8 sm:text-lg"
         >
-          <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
+          <Plus className="h-5 w-5 transition-transform duration-300 group-hover:rotate-90" />
           Get Started
         </Button>
       </motion.div>
@@ -91,7 +112,7 @@ export function EmptyState({ onCreateNew }: EmptyStateProps) {
       {/* Feature hints */}
       <motion.div
         variants={itemVariants}
-        className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-lg"
+        className="mt-12 grid w-full max-w-lg grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
       >
         {[
           { icon: Upload, text: "Upload" },
@@ -101,10 +122,12 @@ export function EmptyState({ onCreateNew }: EmptyStateProps) {
         ].map((feature) => (
           <div
             key={feature.text}
-            className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-muted/30"
+            className="flex flex-col items-center gap-1.5 rounded-lg bg-muted/30 p-3"
           >
-            <feature.icon className="w-4 h-4 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground">{feature.text}</span>
+            <feature.icon className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">
+              {feature.text}
+            </span>
           </div>
         ))}
       </motion.div>

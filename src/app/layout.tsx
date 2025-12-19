@@ -41,7 +41,7 @@ export default function RootLayout({
       <head />
       <body
         suppressHydrationWarning
-        className={`${roboto.variable} font-sans min-h-screen antialiased bg-background text-foreground flex flex-col`}
+        className={`${roboto.variable} flex min-h-screen flex-col bg-background font-sans text-foreground antialiased`}
       >
         <ThemeProvider
           attribute="class"
