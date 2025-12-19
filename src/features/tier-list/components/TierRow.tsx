@@ -186,6 +186,7 @@ export function TierRow({
           role="button"
           aria-label={`Drag to reorder tier ${row.name || row.level}`}
           aria-roledescription="draggable"
+          data-drag-handle
           className={cn(
             "flex w-10 cursor-grab items-center justify-center border-r border-border bg-muted/20 active:cursor-grabbing sm:w-8",
             "group/handle transition-all duration-150 hover:bg-primary/10 active:bg-primary/20",

@@ -384,7 +384,7 @@ export function TierListEditor() {
           data-export-target
           className="overflow-hidden rounded-xl border bg-background shadow-lg"
         >
-          {/* Title for export - hidden in UI, shown when exporting */}
+          {/* Title - Hidden in editor (shows in header), visible in export */}
           <div
             data-export-title
             className="hidden border-b bg-gradient-to-r from-muted/80 to-muted/40 px-4 py-3"

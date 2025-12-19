@@ -215,7 +215,8 @@ export function TierListCard({
               size="icon"
               className={cn(
                 "absolute right-2 top-2 h-8 w-8 rounded-full shadow-md transition-all duration-200",
-                "opacity-0 group-hover:opacity-100",
+                // Always visible on touch devices, hover-reveal on desktop
+                "opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100",
                 "bg-background/90 hover:bg-background"
               )}
               onClick={(e) => e.stopPropagation()}

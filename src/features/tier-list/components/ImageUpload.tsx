@@ -74,6 +74,43 @@ export function ImageUpload({ className }: ImageUploadProps) {
   const getCurrentList = useTierStore((state) => state.getCurrentList);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Check if an image already exists in the tier list
+  const checkForDuplicate = useCallback(
+    (
+      base64: string,
+      fileName: string
+    ): { isDuplicate: boolean; existingName?: string } => {
+      const currentList = getCurrentList();
+      if (!currentList) return { isDuplicate: false };
+
+      // Check all items (in tiers and unassigned)
+      const allItems = [
+        ...currentList.unassignedItems,
+        ...currentList.rows.flatMap((row) => row.items),
+      ];
+
+      // Compare base64 data (ignoring minor compression differences by comparing a hash-like portion)
+      for (const item of allItems) {
+        if (item.imageUrl) {
+          // Compare the actual image data portion (skip the data:image/... prefix for more reliable comparison)
+          const existingData = item.imageUrl.split(",")[1] || "";
+          const newData = base64.split(",")[1] || "";
+
+          // If the data matches or file names match, it's likely a duplicate
+          if (
+            existingData === newData ||
+            item.name.toLowerCase() === fileName.toLowerCase()
+          ) {
+            return { isDuplicate: true, existingName: item.name };
+          }
+        }
+      }
+
+      return { isDuplicate: false };
+    },
+    [getCurrentList]
+  );
+
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       const currentList = getCurrentList();
@@ -105,12 +142,25 @@ export function ImageUpload({ className }: ImageUploadProps) {
       );
 
       const failedFiles: { name: string; error: string }[] = [];
+      const duplicateFiles: { name: string; existingName: string }[] = [];
       let successCount = 0;
 
       for (const file of validFiles) {
         try {
           const base64 = await processImage(file);
           const name = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+
+          // Check for duplicates
+          const { isDuplicate, existingName } = checkForDuplicate(base64, name);
+
+          if (isDuplicate) {
+            duplicateFiles.push({
+              name: file.name,
+              existingName: existingName || name,
+            });
+          }
+
+          // Always add the item (user might want duplicates intentionally)
           addItem({ name, imageUrl: base64 });
           successCount++;
         } catch (error) {
@@ -122,8 +172,15 @@ export function ImageUpload({ className }: ImageUploadProps) {
         }
       }
 
-      if (failedFiles.length === 0) {
+      // Show appropriate toast message
+      if (failedFiles.length === 0 && duplicateFiles.length === 0) {
         toast.success(`Added ${successCount} image(s)`, { id: toastId });
+      } else if (failedFiles.length === 0 && duplicateFiles.length > 0) {
+        const dupNames = duplicateFiles.map((f) => f.name).join(", ");
+        toast.warning(
+          `Added ${successCount} image(s). Possible duplicates: ${dupNames}`,
+          { id: toastId, duration: 4000 }
+        );
       } else if (successCount > 0) {
         toast.warning(
           `Added ${successCount} image(s), ${failedFiles.length} failed`,
@@ -136,7 +193,7 @@ export function ImageUpload({ className }: ImageUploadProps) {
 
       setIsProcessing(false);
     },
-    [addItem, getCurrentList]
+    [addItem, getCurrentList, checkForDuplicate]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
