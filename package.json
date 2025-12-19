@@ -112,11 +112,7 @@
     "@types/react-dom": "19.2.3"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,css}": [
+    "*.{ts,tsx,json,md,css}": [
       "prettier --write"
     ]
   }
