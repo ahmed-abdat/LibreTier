@@ -18,6 +18,7 @@ export interface TierRow {
   items: TierItem[];
   name?: string;
   description?: string;
+  labelFontSize?: number; // Font size for tier label (default: 16)
 }
 
 // Represents the complete tier list with an unassigned pool
@@ -32,6 +33,7 @@ export interface TierList {
   createdAt: Date;
   updatedAt: Date;
   tags?: string[];
+  titleFontSize?: number; // Font size for tier list title (default: 24)
 }
 
 // State for drag and drop operations

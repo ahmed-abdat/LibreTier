@@ -9,7 +9,6 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { TierItem, TierRow, TierList } from "../index";
-import { useTierStore } from "../store";
 
 type ActiveDragType = "item" | "row" | null;
 
@@ -116,9 +115,6 @@ export function useTierListDnd({
       const { active } = event;
       const activeId = active.id as string;
 
-      // Pause history tracking - drag will be single undo action
-      useTierStore.temporal.getState().pause();
-
       if (activeId.startsWith("row-")) {
         const row = findRow(activeId);
         if (row) {
@@ -153,90 +149,78 @@ export function useTierListDnd({
       setActiveDragType(null);
       setOverId(null);
 
-      // Use try/finally to ensure resume() is always called
-      try {
-        if (!over || !currentList) return;
+      if (!over || !currentList) return;
 
-        const activeId = active.id as string;
-        const overId = over.id as string;
+      const activeId = active.id as string;
+      const overId = over.id as string;
 
-        // Handle row reordering
-        if (wasRowDrag) {
-          if (!overId.startsWith("row-")) return;
+      // Handle row reordering
+      if (wasRowDrag) {
+        if (!overId.startsWith("row-")) return;
 
-          const activeRowId = activeId.replace("row-", "");
-          const overRowId = overId.replace("row-", "");
+        const activeRowId = activeId.replace("row-", "");
+        const overRowId = overId.replace("row-", "");
 
-          const activeIndex = currentList.rows.findIndex(
-            (r) => r.id === activeRowId
-          );
-          const overIndex = currentList.rows.findIndex(
-            (r) => r.id === overRowId
-          );
+        const activeIndex = currentList.rows.findIndex(
+          (r) => r.id === activeRowId
+        );
+        const overIndex = currentList.rows.findIndex((r) => r.id === overRowId);
 
-          if (
-            activeIndex !== -1 &&
-            overIndex !== -1 &&
-            activeIndex !== overIndex
-          ) {
-            reorderTiers(activeIndex, overIndex);
-          }
-          return;
-        }
-
-        // Handle item dragging
-        let sourceContainerId = findContainer(activeId);
-        if (sourceContainerId === "unassigned") sourceContainerId = null;
-
-        let targetContainerId: string | null = null;
-        let targetIndex: number | undefined;
-
-        if (overId === "unassigned-pool") {
-          targetContainerId = null;
-        } else if (overId.startsWith("tier-")) {
-          targetContainerId = overId.replace("tier-", "");
-        } else if (overId.startsWith("row-")) {
-          targetContainerId = overId.replace("row-", "");
-        } else {
-          const overContainer = findContainer(overId);
-          targetContainerId =
-            overContainer === "unassigned" ? null : overContainer;
-
-          const containerItems = getContainerItems(
-            overContainer === "unassigned" ? null : overContainer
-          );
-          const overIndex = containerItems.findIndex(
-            (item) => item.id === overId
-          );
-          if (overIndex !== -1) {
-            targetIndex = overIndex;
-          }
-        }
-
-        // Same container - reorder
         if (
-          sourceContainerId === targetContainerId &&
-          targetIndex !== undefined
+          activeIndex !== -1 &&
+          overIndex !== -1 &&
+          activeIndex !== overIndex
         ) {
-          const containerItems = getContainerItems(sourceContainerId);
-          const activeIndex = containerItems.findIndex(
-            (item) => item.id === activeId
-          );
-
-          if (activeIndex !== -1 && activeIndex !== targetIndex) {
-            const newItems = arrayMove(
-              containerItems,
-              activeIndex,
-              targetIndex
-            );
-            reorderItemsInContainer(sourceContainerId, newItems);
-          }
-        } else if (sourceContainerId !== targetContainerId) {
-          moveItem(activeId, sourceContainerId, targetContainerId, targetIndex);
+          reorderTiers(activeIndex, overIndex);
         }
-      } finally {
-        // Resume history tracking - entire drag is now single undo action
-        useTierStore.temporal.getState().resume();
+        return;
+      }
+
+      // Handle item dragging
+      let sourceContainerId = findContainer(activeId);
+      if (sourceContainerId === "unassigned") sourceContainerId = null;
+
+      let targetContainerId: string | null = null;
+      let targetIndex: number | undefined;
+
+      if (overId === "unassigned-pool") {
+        targetContainerId = null;
+      } else if (overId.startsWith("tier-")) {
+        targetContainerId = overId.replace("tier-", "");
+      } else if (overId.startsWith("row-")) {
+        targetContainerId = overId.replace("row-", "");
+      } else {
+        const overContainer = findContainer(overId);
+        targetContainerId =
+          overContainer === "unassigned" ? null : overContainer;
+
+        const containerItems = getContainerItems(
+          overContainer === "unassigned" ? null : overContainer
+        );
+        const overIndex = containerItems.findIndex(
+          (item) => item.id === overId
+        );
+        if (overIndex !== -1) {
+          targetIndex = overIndex;
+        }
+      }
+
+      // Same container - reorder
+      if (
+        sourceContainerId === targetContainerId &&
+        targetIndex !== undefined
+      ) {
+        const containerItems = getContainerItems(sourceContainerId);
+        const activeIndex = containerItems.findIndex(
+          (item) => item.id === activeId
+        );
+
+        if (activeIndex !== -1 && activeIndex !== targetIndex) {
+          const newItems = arrayMove(containerItems, activeIndex, targetIndex);
+          reorderItemsInContainer(sourceContainerId, newItems);
+        }
+      } else if (sourceContainerId !== targetContainerId) {
+        moveItem(activeId, sourceContainerId, targetContainerId, targetIndex);
       }
     },
     [
@@ -255,8 +239,6 @@ export function useTierListDnd({
     setActiveRow(null);
     setActiveDragType(null);
     setOverId(null);
-    // Resume history tracking on cancel
-    useTierStore.temporal.getState().resume();
   }, []);
 
   // Custom collision detection

@@ -46,6 +46,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Type } from "lucide-react";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -110,10 +117,9 @@ export function TierListEditor() {
   // Track if currently dragging (for disabling undo during drag)
   const isDragging = activeDragType !== null;
 
-  // Undo/Redo state
+  // Undo/Redo state (reactive)
   const canUndo = useTemporalStore((state) => state.pastStates.length > 0);
   const canRedo = useTemporalStore((state) => state.futureStates.length > 0);
-  const { undo, redo } = useTierStore.temporal.getState();
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -137,23 +143,28 @@ export function TierListEditor() {
 
       if (modifier && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
-        if (canUndo) {
-          undo();
-          toast.success("Undone");
-        }
+        useTierStore.temporal.getState().undo();
       }
-      if (modifier && e.key === "z" && e.shiftKey) {
+      if (modifier && e.key === "y") {
         e.preventDefault();
-        if (canRedo) {
-          redo();
-          toast.success("Redone");
-        }
+        useTierStore.temporal.getState().redo();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [canUndo, canRedo, undo, redo, isDragging]);
+  }, [isDragging]);
+
+  // Clear undo history when entering/leaving editor (prevents cross-list confusion)
+  useEffect(() => {
+    // Clear on mount (fresh start for this list)
+    useTierStore.temporal.getState().clear();
+
+    // Clear on unmount (free memory)
+    return () => {
+      useTierStore.temporal.getState().clear();
+    };
+  }, []);
 
   if (!currentList) {
     return (
@@ -177,7 +188,7 @@ export function TierListEditor() {
       {/* Header */}
       <div className="flex flex-col gap-2 border-b pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
-          <div className="group relative inline-block">
+          <div className="group relative inline-flex items-center gap-2">
             <h1
               contentEditable
               suppressContentEditableWarning
@@ -206,11 +217,51 @@ export function TierListEditor() {
                   selection.collapseToEnd();
                 }
               }}
-              className="cursor-text rounded-md px-2 py-1 text-xl font-bold outline-none transition-colors hover:bg-muted/30 focus:bg-muted/20 focus:ring-2 focus:ring-primary/20 sm:text-2xl"
+              className="cursor-text rounded-md px-2 py-1 font-bold outline-none transition-colors hover:bg-muted/30 focus:bg-muted/20 focus:ring-2 focus:ring-primary/20"
+              style={{
+                fontSize: `${currentList.titleFontSize || 24}px`,
+              }}
             >
               {currentList.title}
             </h1>
-            <Pencil className="pointer-events-none absolute right-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-50" />
+            <Pencil className="pointer-events-none h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-50" />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+                  aria-label="Adjust title font size"
+                >
+                  <Type className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64" align="start">
+                <div className="space-y-3">
+                  <Label htmlFor="title-font-size">
+                    Title Font Size: {currentList.titleFontSize || 24}px
+                  </Label>
+                  <input
+                    id="title-font-size"
+                    type="range"
+                    min="16"
+                    max="48"
+                    step="1"
+                    value={currentList.titleFontSize || 24}
+                    onChange={(e) => {
+                      updateList({
+                        titleFontSize: parseInt(e.target.value, 10),
+                      });
+                    }}
+                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
+                  />
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>16px</span>
+                    <span>48px</span>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <p className="mt-1 px-2 text-xs text-muted-foreground">
             {totalItems === 0
@@ -228,10 +279,7 @@ export function TierListEditor() {
                   size="icon"
                   className="h-10 w-10 sm:h-9 sm:w-9"
                   disabled={!canUndo || isDragging}
-                  onClick={() => {
-                    undo();
-                    toast.success("Undone");
-                  }}
+                  onClick={() => useTierStore.temporal.getState().undo()}
                 >
                   <Undo2 className="h-4 w-4" />
                 </Button>
@@ -247,10 +295,7 @@ export function TierListEditor() {
                   size="icon"
                   className="h-10 w-10 sm:h-9 sm:w-9"
                   disabled={!canRedo || isDragging}
-                  onClick={() => {
-                    redo();
-                    toast.success("Redone");
-                  }}
+                  onClick={() => useTierStore.temporal.getState().redo()}
                 >
                   <Redo2 className="h-4 w-4" />
                 </Button>
@@ -344,7 +389,12 @@ export function TierListEditor() {
             data-export-title
             className="hidden border-b bg-gradient-to-r from-muted/80 to-muted/40 px-4 py-3"
           >
-            <h2 className="text-lg font-bold">{currentList.title}</h2>
+            <h2
+              className="font-bold"
+              style={{ fontSize: `${currentList.titleFontSize || 24}px` }}
+            >
+              {currentList.title}
+            </h2>
           </div>
 
           {/* Tier Rows with Sortable Context for row reordering */}

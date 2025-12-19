@@ -129,8 +129,11 @@ export function TierRow({
 
         {/* Tier Label */}
         <div
-          className="flex w-16 min-w-[4rem] shrink-0 items-center justify-center text-lg font-bold sm:w-24 sm:min-w-[6rem] sm:text-xl"
-          style={{ backgroundColor: row.color }}
+          className="flex w-16 min-w-[4rem] shrink-0 items-center justify-center font-bold sm:w-24 sm:min-w-[6rem]"
+          style={{
+            backgroundColor: row.color,
+            fontSize: `${row.labelFontSize || 16}px`,
+          }}
         >
           <span
             className="select-none drop-shadow-sm"
@@ -197,10 +200,13 @@ export function TierRow({
       {/* Tier Label */}
       <div
         className={cn(
-          "group relative flex w-16 min-w-[4rem] shrink-0 items-center justify-center text-lg font-bold sm:w-24 sm:min-w-[6rem] sm:text-xl",
-          isExporting && "w-24 min-w-[6rem] text-xl"
+          "group relative flex w-16 min-w-[4rem] shrink-0 items-center justify-center font-bold sm:w-24 sm:min-w-[6rem]",
+          isExporting && "w-24 min-w-[6rem]"
         )}
-        style={{ backgroundColor: row.color }}
+        style={{
+          backgroundColor: row.color,
+          fontSize: `${row.labelFontSize || 16}px`,
+        }}
       >
         {/* Inline editable tier name */}
         {isEditing && !isExporting ? (
@@ -211,9 +217,12 @@ export function TierRow({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="h-full w-full rounded border-2 border-white/50 bg-transparent px-1 text-center text-xl font-bold outline-none"
-            style={{ color: textColor }}
-            maxLength={10}
+            className="h-full w-full rounded border-2 border-white/50 bg-transparent px-1 text-center font-bold outline-none"
+            style={{
+              color: textColor,
+              fontSize: `${row.labelFontSize || 16}px`,
+            }}
+            maxLength={50}
           />
         ) : (
           <button
@@ -266,6 +275,26 @@ export function TierRow({
             </PopoverTrigger>
             <PopoverContent className="w-64" align="start" side="right">
               <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Label Font Size: {row.labelFontSize || 16}px</Label>
+                  <input
+                    type="range"
+                    min="12"
+                    max="32"
+                    step="1"
+                    value={row.labelFontSize || 16}
+                    onChange={(e) => {
+                      updateTier(row.id, {
+                        labelFontSize: parseInt(e.target.value, 10),
+                      });
+                    }}
+                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
+                  />
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>12px</span>
+                    <span>32px</span>
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <Label>Color</Label>
                   <div

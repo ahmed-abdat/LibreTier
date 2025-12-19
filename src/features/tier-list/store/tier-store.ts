@@ -73,12 +73,14 @@ const createNewTierList = (title: string): TierList => ({
     color: TIER_COLORS[level],
     items: [],
     name: level,
+    labelFontSize: 16, // Default font size for tier labels
   })),
   unassignedItems: [],
   createdBy: "local-user",
   isPublic: false,
   createdAt: new Date(),
   updatedAt: new Date(),
+  titleFontSize: 24, // Default font size for title
 });
 
 // Type for partialized state (only what we track in history)
@@ -168,7 +170,16 @@ export const useTierStore = create<TierStore>()(
               // Only reject if entirely whitespace
               if (!updates.title.trim()) return state;
               // Allow spaces while typing, just limit length
-              updates = { ...updates, title: updates.title.slice(0, 100) };
+              updates = { ...updates, title: updates.title.slice(0, 200) };
+            }
+
+            // Validate titleFontSize if provided
+            if (updates.titleFontSize !== undefined) {
+              const fontSize = Math.max(
+                12,
+                Math.min(48, updates.titleFontSize)
+              );
+              updates = { ...updates, titleFontSize: fontSize };
             }
 
             return {
@@ -191,6 +202,7 @@ export const useTierStore = create<TierStore>()(
               color: TIER_COLORS[level] || "#808080",
               items: [],
               name: level,
+              labelFontSize: 16, // Default font size for tier labels
             };
 
             return {
@@ -224,6 +236,7 @@ export const useTierStore = create<TierStore>()(
               color,
               items: [],
               name: trimmedName.slice(0, 10),
+              labelFontSize: 16, // Default font size for tier labels
             };
 
             return {
@@ -254,6 +267,15 @@ export const useTierStore = create<TierStore>()(
             if (updates.color !== undefined) {
               const hexRegex = /^#[0-9A-Fa-f]{6}$/;
               if (!hexRegex.test(updates.color)) return state;
+            }
+
+            // Validate labelFontSize if provided
+            if (updates.labelFontSize !== undefined) {
+              const fontSize = Math.max(
+                10,
+                Math.min(32, updates.labelFontSize)
+              );
+              updates = { ...updates, labelFontSize: fontSize };
             }
 
             return {
@@ -611,6 +633,8 @@ export const useTierStore = create<TierStore>()(
       }),
       storage: {
         getItem: (name) => {
+          // Skip on server (SSR)
+          if (typeof window === "undefined") return null;
           try {
             const str = localStorage.getItem(name);
             if (!str) return null;
@@ -643,12 +667,9 @@ export const useTierStore = create<TierStore>()(
             return data;
           } catch (error) {
             console.error("Failed to parse localStorage data:", error);
-            // Warn user about data loss before clearing
-            if (typeof window !== "undefined") {
-              console.warn(
-                "Tier list data was corrupted and will be reset. Consider exporting your lists regularly."
-              );
-            }
+            console.warn(
+              "Tier list data was corrupted and will be reset. Consider exporting your lists regularly."
+            );
             try {
               localStorage.removeItem(name);
             } catch {
@@ -658,11 +679,11 @@ export const useTierStore = create<TierStore>()(
           }
         },
         setItem: (name, value) => {
+          if (typeof window === "undefined") return;
           try {
             localStorage.setItem(name, JSON.stringify(value));
           } catch (error) {
             console.error("Failed to save to localStorage:", error);
-            // QuotaExceededError or SecurityError
             if (error instanceof Error && error.name === "QuotaExceededError") {
               console.warn(
                 "Storage quota exceeded. Consider removing old tier lists."
@@ -671,6 +692,7 @@ export const useTierStore = create<TierStore>()(
           }
         },
         removeItem: (name) => {
+          if (typeof window === "undefined") return;
           try {
             localStorage.removeItem(name);
           } catch {
