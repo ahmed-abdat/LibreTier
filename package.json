@@ -80,6 +80,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
     "@next/eslint-plugin-next": "16.0.7",
     "@playwright/test": "^1.57.0",
     "@testing-library/dom": "^10.4.1",
