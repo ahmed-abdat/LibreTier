@@ -39,6 +39,34 @@ export const useSettingsStore = create<SettingsStore>()(
     {
       name: "tier-editor-settings",
       partialize: (state) => ({ settings: state.settings }),
+      storage: {
+        getItem: (name) => {
+          if (typeof window === "undefined") return null;
+          try {
+            const str = localStorage.getItem(name);
+            return str ? JSON.parse(str) : null;
+          } catch {
+            console.warn("Failed to load settings, using defaults");
+            return null;
+          }
+        },
+        setItem: (name, value) => {
+          if (typeof window === "undefined") return;
+          try {
+            localStorage.setItem(name, JSON.stringify(value));
+          } catch (error) {
+            console.warn("Failed to save settings:", error);
+          }
+        },
+        removeItem: (name) => {
+          if (typeof window === "undefined") return;
+          try {
+            localStorage.removeItem(name);
+          } catch {
+            // Storage may be restricted
+          }
+        },
+      },
     }
   )
 );
