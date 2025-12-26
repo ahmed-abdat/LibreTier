@@ -572,22 +572,24 @@ export function TierListEditor() {
         {/* Image Upload - At the bottom for adding new items */}
         <ImageUpload />
 
-        {/* Drag Overlay */}
-        {!settings.reduceAnimations && (
-          <DragOverlay
-            dropAnimation={{
-              duration: 250,
-              easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
-            }}
-          >
-            {activeDragType === "item" && activeItem ? (
-              <TierItem item={activeItem} containerId={null} isOverlay />
-            ) : null}
-            {activeDragType === "row" && activeRow ? (
-              <TierRow row={activeRow} isRowOverlay />
-            ) : null}
-          </DragOverlay>
-        )}
+        {/* Drag Overlay - always show for drag feedback, only disable animation */}
+        <DragOverlay
+          dropAnimation={
+            settings.reduceAnimations
+              ? null
+              : {
+                  duration: 250,
+                  easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+                }
+          }
+        >
+          {activeDragType === "item" && activeItem ? (
+            <TierItem item={activeItem} containerId={null} isOverlay />
+          ) : null}
+          {activeDragType === "row" && activeRow ? (
+            <TierRow row={activeRow} isRowOverlay />
+          ) : null}
+        </DragOverlay>
       </DndContext>
 
       {/* Help text */}
