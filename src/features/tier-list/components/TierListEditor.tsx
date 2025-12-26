@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo, useCallback } from "react";
+import dynamic from "next/dynamic";
 import {
   DndContext,
   DragOverlay,
@@ -11,8 +12,8 @@ import {
   useSensors,
   MeasuringStrategy,
 } from "@dnd-kit/core";
+import { NoopKeyboardSensor } from "../utils/NoopKeyboardSensor";
 import {
-  sortableKeyboardCoordinates,
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
@@ -23,15 +24,26 @@ import {
   MoreVertical,
   Undo2,
   Redo2,
+  ArrowDown,
 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTierStore, useTemporalStore } from "../store";
-import { TIER_DEFAULTS } from "../constants";
+import { useSettingsStore } from "../store/settings-store";
+import { TIER_DEFAULTS, MAX_TITLE_LENGTH } from "../constants";
 import { TierRow } from "./TierRow";
 import { TierItem } from "./TierItem";
 import { ItemPool } from "./ItemPool";
 import { ImageUpload } from "./ImageUpload";
 import { ExportButton } from "./ExportButton";
+import { FloatingActionBar } from "./FloatingActionBar";
+
+// Code split SettingsDialog - only load when user opens settings
+const SettingsDialog = dynamic(
+  () => import("./SettingsDialog").then((mod) => ({ default: mod.SettingsDialog })),
+  { ssr: false }
+);
 import { useTierListDnd } from "../hooks/useTierListDnd";
+import { createTierListKeyboardCoordinates } from "../utils/tierListKeyboardCoordinates";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -46,13 +58,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
-import { Type } from "lucide-react";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -64,27 +69,28 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+// import { cn } from "@/lib/utils"; // Unused for now
 
 export function TierListEditor() {
   const exportRef = useRef<HTMLDivElement>(null);
 
-  const {
-    getCurrentList,
-    updateList,
-    clearAllItems,
-    moveItem,
-    reorderTiers,
-    reorderItemsInContainer,
-    addCustomTier,
-  } = useTierStore();
+  // Optimize: actions-only selector to prevent re-renders on state changes
+  const getCurrentList = useTierStore((state) => state.getCurrentList);
+  const updateList = useTierStore((state) => state.updateList);
+  const clearAllItems = useTierStore((state) => state.clearAllItems);
+  const moveItem = useTierStore((state) => state.moveItem);
+  const reorderTiers = useTierStore((state) => state.reorderTiers);
+  const reorderItemsInContainer = useTierStore((state) => state.reorderItemsInContainer);
+  const addCustomTier = useTierStore((state) => state.addCustomTier);
 
+  const settings = useSettingsStore((state) => state.settings);
   const currentList = getCurrentList();
 
   const {
     activeItem,
     activeRow,
     activeDragType,
-    overId,
+    // overId, // Unused for now
     handleDragStart,
     handleDragOver,
     handleDragEnd,
@@ -97,35 +103,75 @@ export function TierListEditor() {
     reorderItemsInContainer,
   });
 
+  // Custom keyboard coordinate getter for mixed layout navigation
+  const keyboardCoordinates = useMemo(
+    () =>
+      createTierListKeyboardCoordinates(() => {
+        if (!currentList) return null;
+        return {
+          rows: currentList.rows.map((row) => ({
+            id: row.id,
+            items: row.items.map((item) => ({ id: item.id })),
+          })),
+          unassignedItems: currentList.unassignedItems.map((item) => ({
+            id: item.id,
+          })),
+        };
+      }),
+    [currentList]
+  );
+
+  // Always create all 3 sensors - avoid array size changes for performance
   const sensors = useSensors(
     useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 10,
-      },
+      activationConstraint: { distance: 10 },
     }),
     useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 250,
-        tolerance: 5,
-      },
+      activationConstraint: { delay: 250, tolerance: 5 },
     }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(
+      settings.enableKeyboardNavigation ? KeyboardSensor : NoopKeyboardSensor,
+      settings.enableKeyboardNavigation
+        ? { coordinateGetter: keyboardCoordinates }
+        : {}
+    )
   );
 
   // Track if currently dragging (for disabling undo during drag)
-  const isDragging = activeDragType !== null;
+  const isDraggingRef = useRef(false);
+
+  // Update ref in useEffect to avoid render-phase updates
+  useEffect(() => {
+    isDraggingRef.current = activeDragType !== null;
+  }, [activeDragType]);
 
   // Undo/Redo state (reactive)
   const canUndo = useTemporalStore((state) => state.pastStates.length > 0);
   const canRedo = useTemporalStore((state) => state.futureStates.length > 0);
 
+  // Add tier handler - memoized for performance
+  const handleAddTier = useCallback(() => {
+    if (!currentList) return;
+    const existingNames = new Set(currentList.rows.map((r) => r.name));
+    const nextIndex = currentList.rows.length % TIER_DEFAULTS.length;
+    const baseName = TIER_DEFAULTS[nextIndex].name;
+    let newName: string = baseName;
+    let counter = 1;
+    while (existingNames.has(newName)) {
+      newName = `${baseName}${counter}`;
+      counter++;
+    }
+    addCustomTier(newName, TIER_DEFAULTS[nextIndex].color);
+    toast.success(`Added tier "${newName}"`);
+  }, [currentList, addCustomTier]);
+
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
+    if (!settings.enableUndoRedo) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore during drag operations
-      if (isDragging) return;
+      if (isDraggingRef.current) return;
 
       // Ignore if user is typing in an input/contenteditable
       const target = e.target as HTMLElement;
@@ -153,7 +199,7 @@ export function TierListEditor() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isDragging]);
+  }, [settings.enableUndoRedo]);
 
   // Clear undo history when entering/leaving editor (prevents cross-list confusion)
   useEffect(() => {
@@ -166,6 +212,92 @@ export function TierListEditor() {
     };
   }, []);
 
+  // Memoized values - must be before early return
+  const rowIds = useMemo(
+    () => currentList?.rows.map((row) => `row-${row.id}`) ?? [],
+    [currentList?.rows]
+  );
+
+  const totalItems = useMemo(
+    () =>
+      currentList
+        ? currentList.rows.reduce((acc, row) => acc + row.items.length, 0) +
+          currentList.unassignedItems.length
+        : 0,
+    [currentList]
+  );
+
+  // ContentEditable callbacks - extracted for stable references
+  const handleTitleBlur = useCallback(
+    (e: React.FocusEvent<HTMLElement>) => {
+      const newTitle =
+        e.currentTarget.textContent?.trim().slice(0, MAX_TITLE_LENGTH) ||
+        "Untitled Tier List";
+      if (currentList && newTitle !== currentList.title) {
+        updateList({ title: newTitle });
+      }
+    },
+    [currentList, updateList]
+  );
+
+  const handleTitleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.currentTarget.blur();
+        return;
+      }
+      // Prevent typing if at max length (allow delete/backspace/arrows)
+      const allowedKeys = [
+        "Backspace",
+        "Delete",
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "ArrowDown",
+        "Home",
+        "End",
+      ];
+      const currentLength = e.currentTarget.textContent?.length || 0;
+      if (
+        currentLength >= MAX_TITLE_LENGTH &&
+        !allowedKeys.includes(e.key) &&
+        !e.ctrlKey &&
+        !e.metaKey
+      ) {
+        e.preventDefault();
+        toast.error(`Title limited to ${MAX_TITLE_LENGTH} characters`);
+      }
+    },
+    [] // All values accessed from event
+  );
+
+  const handleTitlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLElement>) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData("text/plain");
+      const currentText = e.currentTarget.textContent || "";
+      const selection = window.getSelection();
+      // Calculate how many chars we can add
+      const selectedLength = selection?.toString().length || 0;
+      const availableSpace =
+        MAX_TITLE_LENGTH - currentText.length + selectedLength;
+      const truncatedText = text.slice(0, availableSpace);
+
+      if (truncatedText && selection?.rangeCount) {
+        selection.deleteFromDocument();
+        selection
+          .getRangeAt(0)
+          .insertNode(document.createTextNode(truncatedText));
+        selection.collapseToEnd();
+      }
+      if (text.length > truncatedText.length) {
+        toast.error(`Title limited to ${MAX_TITLE_LENGTH} characters`);
+      }
+    },
+    []
+  );
+
   if (!currentList) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -177,139 +309,96 @@ export function TierListEditor() {
     );
   }
 
-  const rowIds = currentList.rows.map((row) => `row-${row.id}`);
-
-  const totalItems =
-    currentList.rows.reduce((acc, row) => acc + row.items.length, 0) +
-    currentList.unassignedItems.length;
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-2 border-b pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      {/* Header - Sticky on desktop */}
+      <div className="sticky top-12 z-40 -mx-4 hidden flex-col gap-2 border-b bg-background/95 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:top-14 md:flex">
         <div className="min-w-0 flex-1">
-          <div className="group relative inline-flex items-center gap-2">
+          <div className="group relative inline-flex max-w-full items-center gap-2">
             <h1
               contentEditable
               suppressContentEditableWarning
-              onBlur={(e) => {
-                const newTitle =
-                  e.currentTarget.textContent?.trim() || "Untitled Tier List";
-                if (newTitle !== currentList.title) {
-                  updateList({ title: newTitle });
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  e.currentTarget.blur();
-                }
-              }}
-              onPaste={(e) => {
-                e.preventDefault();
-                const text = e.clipboardData.getData("text/plain");
-                const selection = window.getSelection();
-                if (selection?.rangeCount) {
-                  selection.deleteFromDocument();
-                  selection
-                    .getRangeAt(0)
-                    .insertNode(document.createTextNode(text));
-                  selection.collapseToEnd();
-                }
-              }}
-              className="cursor-text rounded-md px-2 py-1 font-bold outline-none transition-colors hover:bg-muted/30 focus:bg-muted/20 focus:ring-2 focus:ring-primary/20"
-              style={{
-                fontSize: `${currentList.titleFontSize || 24}px`,
-              }}
+              onBlur={handleTitleBlur}
+              onKeyDown={handleTitleKeyDown}
+              onPaste={handleTitlePaste}
+              className="max-w-[calc(100vw-6rem)] cursor-text break-words rounded-md border-2 border-transparent px-2 py-1 text-xl font-bold outline-none transition-all hover:border-dashed hover:border-muted-foreground/30 focus:border-solid focus:border-primary/50 focus:bg-muted/20 sm:max-w-[600px] sm:text-2xl md:text-3xl"
             >
               {currentList.title}
             </h1>
-            <Pencil className="pointer-events-none h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-50" />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
-                  aria-label="Adjust title font size"
-                >
-                  <Type className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64" align="start">
-                <div className="space-y-3">
-                  <Label htmlFor="title-font-size">
-                    Title Font Size: {currentList.titleFontSize || 24}px
-                  </Label>
-                  <input
-                    id="title-font-size"
-                    type="range"
-                    min="16"
-                    max="48"
-                    step="1"
-                    value={currentList.titleFontSize || 24}
-                    onChange={(e) => {
-                      updateList({
-                        titleFontSize: parseInt(e.target.value, 10),
-                      });
-                    }}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
-                  />
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>16px</span>
-                    <span>48px</span>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <Pencil className="pointer-events-none h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-50" />
           </div>
-          <p className="mt-1 px-2 text-xs text-muted-foreground">
-            {totalItems === 0
-              ? "No items yet — upload some images to get started"
-              : `${totalItems} ${totalItems === 1 ? "item" : "items"} • ${currentList.rows.length} ${currentList.rows.length === 1 ? "tier" : "tiers"}`}
-          </p>
+          <div className="mt-1 flex items-center gap-3 px-2">
+            <p className="text-xs text-muted-foreground">
+              {totalItems === 0
+                ? "No items yet — upload some images to get started"
+                : `${totalItems} ${totalItems === 1 ? "item" : "items"} • ${currentList.rows.length} ${currentList.rows.length === 1 ? "tier" : "tiers"}`}
+            </p>
+            {/* Tier color strip */}
+            <div className="flex gap-0.5">
+              {currentList.rows.slice(0, 8).map((row) => (
+                <div
+                  key={row.id}
+                  className="h-1.5 w-3 rounded-full transition-transform hover:scale-110"
+                  style={{ backgroundColor: row.color }}
+                  title={row.name || row.level}
+                />
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2 px-2 sm:px-0">
-          {/* Undo/Redo buttons */}
-          <div className="flex items-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 sm:h-9 sm:w-9"
-                  disabled={!canUndo || isDragging}
-                  onClick={() => useTierStore.temporal.getState().undo()}
-                >
-                  <Undo2 className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Undo (Ctrl+Z)</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 sm:h-9 sm:w-9"
-                  disabled={!canRedo || isDragging}
-                  onClick={() => useTierStore.temporal.getState().redo()}
-                >
-                  <Redo2 className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Redo (Ctrl+Shift+Z)</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          {/* History group with subtle bg */}
+          {settings.enableUndoRedo && (
+            <div className="flex items-center rounded-lg bg-muted/40 p-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-11 w-11 md:h-9 md:w-9"
+                    disabled={!canUndo || activeDragType !== null}
+                    onClick={() => useTierStore.temporal.getState().undo()}
+                    aria-label="Undo last action"
+                  >
+                    <Undo2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Undo (Ctrl+Z)</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-11 w-11 md:h-9 md:w-9"
+                    disabled={!canRedo || activeDragType !== null}
+                    onClick={() => useTierStore.temporal.getState().redo()}
+                    aria-label="Redo last undone action"
+                  >
+                    <Redo2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Redo (Ctrl+Shift+Z)</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
+
+          {/* Separator - only show when undo/redo is visible */}
+          {settings.enableUndoRedo && (
+            <div className="hidden h-5 w-px bg-border sm:block" />
+          )}
+
+          {/* Actions group */}
           <ExportButton
             targetRef={exportRef}
             filename={currentList.title.toLowerCase().replace(/\s+/g, "-")}
             hasItems={currentList.rows.some((row) => row.items.length > 0)}
           />
+          <SettingsDialog />
           <DropdownMenu>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -317,7 +406,8 @@ export function TierListEditor() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 sm:h-9 sm:w-9"
+                    className="h-11 w-11 md:h-10 md:w-10"
+                    aria-label="More options"
                   >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
@@ -368,13 +458,25 @@ export function TierListEditor() {
       <DndContext
         sensors={sensors}
         collisionDetection={collisionDetection}
-        onDragStart={handleDragStart}
+        onDragStart={(event) => {
+          // Pause undo history during drag to prevent flooding
+          useTierStore.temporal.getState().pause();
+          handleDragStart(event);
+        }}
         onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
+        onDragEnd={(event) => {
+          // Resume undo history after drag
+          useTierStore.temporal.getState().resume();
+          handleDragEnd(event);
+        }}
+        onDragCancel={() => {
+          // Resume undo history on cancel
+          useTierStore.temporal.getState().resume();
+          handleDragCancel();
+        }}
         measuring={{
           droppable: {
-            strategy: MeasuringStrategy.Always,
+            strategy: MeasuringStrategy.WhileDragging,
           },
         }}
       >
@@ -389,10 +491,7 @@ export function TierListEditor() {
             data-export-title
             className="hidden border-b bg-gradient-to-r from-muted/80 to-muted/40 px-4 py-3"
           >
-            <h2
-              className="font-bold"
-              style={{ fontSize: `${currentList.titleFontSize || 24}px` }}
-            >
+            <h2 className="text-xl font-bold sm:text-2xl md:text-3xl">
               {currentList.title}
             </h2>
           </div>
@@ -402,69 +501,93 @@ export function TierListEditor() {
             items={rowIds}
             strategy={verticalListSortingStrategy}
           >
-            {currentList.rows.map((row) => (
-              <TierRow
-                key={row.id}
-                row={row}
-                isOver={
-                  overId === `tier-${row.id}` ||
-                  overId === `row-${row.id}` ||
-                  row.items.some((item) => item.id === overId)
-                }
-                isRowDragging={activeDragType === "row"}
-              />
-            ))}
+            {!settings.reduceAnimations ? (
+              <AnimatePresence mode="popLayout" initial={false}>
+                {currentList.rows.map((row) => (
+                  <motion.div
+                    key={row.id}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0, x: -20 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    layout
+                  >
+                    <TierRow
+                      row={row}
+                      isRowDragging={activeDragType === "row"}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            ) : (
+              currentList.rows.map((row) => (
+                <TierRow
+                  key={row.id}
+                  row={row}
+                  isRowDragging={activeDragType === "row"}
+                />
+              ))
+            )}
           </SortableContext>
+
+          {/* Add Tier Button - Inside tier box, hidden during export */}
+          <div
+            data-hide-export
+            className="border-t border-dashed border-muted-foreground/20 p-3"
+          >
+            <Button
+              variant="ghost"
+              className="group w-full gap-2 py-2.5 text-muted-foreground transition-all hover:bg-primary/5 hover:text-foreground"
+              onClick={handleAddTier}
+            >
+              <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
+              Add New Tier
+            </Button>
+          </div>
         </div>
 
-        {/* Unassigned Items Pool - Close to tiers for easy drag */}
-        <ItemPool
-          items={currentList.unassignedItems}
-          isOver={
-            overId === "unassigned-pool" ||
-            currentList.unassignedItems.some((item) => item.id === overId)
-          }
-        />
+        {/* Empty state hint - when no items uploaded */}
+        {totalItems === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center gap-3 py-6 text-center"
+          >
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="text-muted-foreground"
+            >
+              <ArrowDown className="h-6 w-6" />
+            </motion.div>
+            <p className="text-sm text-muted-foreground">
+              Drop images below to start ranking
+            </p>
+          </motion.div>
+        )}
 
-        {/* Add Tier Button */}
-        <Button
-          variant="outline"
-          className="group w-full gap-2 border-2 border-dashed py-3 transition-all hover:border-primary hover:bg-primary/5"
-          onClick={() => {
-            const existingNames = currentList.rows.map((r) => r.name);
-            const nextIndex = currentList.rows.length % TIER_DEFAULTS.length;
-            const baseName = TIER_DEFAULTS[nextIndex].name;
-            let newName: string = baseName;
-            let counter = 1;
-            while (existingNames.includes(newName)) {
-              newName = `${baseName}${counter}`;
-              counter++;
-            }
-            addCustomTier(newName, TIER_DEFAULTS[nextIndex].color);
-            toast.success(`Added tier "${newName}"`);
-          }}
-        >
-          <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
-          Add New Tier
-        </Button>
+        {/* Unassigned Items Pool - Close to tiers for easy drag */}
+        <ItemPool items={currentList.unassignedItems} />
 
         {/* Image Upload - At the bottom for adding new items */}
         <ImageUpload />
 
         {/* Drag Overlay */}
-        <DragOverlay
-          dropAnimation={{
-            duration: 250,
-            easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
-          }}
-        >
-          {activeDragType === "item" && activeItem ? (
-            <TierItem item={activeItem} containerId={null} isOverlay />
-          ) : null}
-          {activeDragType === "row" && activeRow ? (
-            <TierRow row={activeRow} isRowOverlay />
-          ) : null}
-        </DragOverlay>
+        {!settings.reduceAnimations && (
+          <DragOverlay
+            dropAnimation={{
+              duration: 250,
+              easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+            }}
+          >
+            {activeDragType === "item" && activeItem ? (
+              <TierItem item={activeItem} containerId={null} isOverlay />
+            ) : null}
+            {activeDragType === "row" && activeRow ? (
+              <TierRow row={activeRow} isRowOverlay />
+            ) : null}
+          </DragOverlay>
+        )}
       </DndContext>
 
       {/* Help text */}
@@ -492,6 +615,13 @@ export function TierListEditor() {
           to cancel
         </span>
       </div>
+
+      {/* Mobile Floating Action Bar - only visible <768px */}
+      <FloatingActionBar
+        exportTargetRef={exportRef}
+        filename={currentList.title.toLowerCase().replace(/\s+/g, "-")}
+        hasItems={currentList.rows.some((row) => row.items.length > 0)}
+      />
     </div>
   );
 }

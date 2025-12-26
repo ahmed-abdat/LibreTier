@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -25,22 +25,20 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useTierStore } from "../store";
 import { PRESET_COLORS } from "../constants";
+import { useAutoResizeTextarea } from "../hooks/useAutoResizeTextarea";
 
 interface TierRowProps {
   row: TierRowType;
   isExporting?: boolean;
-  isOver?: boolean;
   isRowDragging?: boolean;
   isRowOverlay?: boolean;
 }
 
-export function TierRow({
+export const TierRow = memo(function TierRow({
   row,
   isExporting,
-  isOver: isOverProp,
   isRowDragging,
   isRowOverlay,
 }: TierRowProps) {
@@ -51,13 +49,19 @@ export function TierRow({
   // Inline editing state
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(row.name || row.level);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useAutoResizeTextarea(inputRef, editValue);
 
   // Focus input when entering edit mode
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();
+      // Trigger resize immediately when entering edit mode
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
     }
   }, [isEditing]);
 
@@ -72,7 +76,8 @@ export function TierRow({
 
   // Handle key events
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleSave();
     } else if (e.key === "Escape") {
       setEditValue(row.name || row.level);
@@ -97,23 +102,21 @@ export function TierRow({
   });
 
   // Droppable for items
-  const { setNodeRef: setDroppableRef, isOver: isDroppableOver } = useDroppable(
-    {
-      id: `tier-${row.id}`,
-      data: {
-        type: "tier",
-        tierId: row.id,
-      },
-    }
-  );
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id: `tier-${row.id}`,
+    data: {
+      type: "tier",
+      tierId: row.id,
+    },
+  });
 
   const itemIds = row.items.map((item) => item.id);
-  const showDropHighlight = isOverProp || isDroppableOver;
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     WebkitTouchCallout: "none",
+    willChange: "transform",
   };
 
   const textColor = getContrastColor(row.color);
@@ -129,15 +132,16 @@ export function TierRow({
 
         {/* Tier Label */}
         <div
-          className="flex w-16 min-w-[4rem] shrink-0 items-center justify-center font-bold sm:w-24 sm:min-w-[6rem]"
-          style={{
-            backgroundColor: row.color,
-            fontSize: `${row.labelFontSize || 16}px`,
-          }}
+          className="flex w-16 min-w-[4rem] shrink-0 items-center justify-center p-1 font-bold sm:w-24 sm:min-w-[6rem]"
+          style={{ backgroundColor: row.color }}
         >
           <span
-            className="select-none drop-shadow-sm"
-            style={{ color: textColor }}
+            className="block w-full break-words text-center font-bold drop-shadow-sm"
+            style={{
+              color: textColor,
+              fontSize: "14px",
+              lineHeight: "1.2",
+            }}
           >
             {row.name || row.level}
           </span>
@@ -173,7 +177,10 @@ export function TierRow({
       ref={setSortableRef}
       style={style}
       className={cn(
-        "flex border-b border-border transition-all duration-200 last:border-b-0",
+        "group/row relative flex border-b border-border transition-all duration-200 last:border-b-0",
+        // Hover effects - using box-shadow instead of border to avoid layout shift
+        "hover:shadow-[inset_4px_0_0_0_hsl(var(--primary)/0.4),0_4px_12px_-4px_hsl(var(--primary)/0.1)]",
+        "hover:bg-muted/5",
         isDragging && "bg-muted/50 opacity-50",
         isRowDragging && !isDragging && "translate-y-0"
       )}
@@ -204,26 +211,25 @@ export function TierRow({
           "group relative flex w-16 min-w-[4rem] shrink-0 items-center justify-center font-bold sm:w-24 sm:min-w-[6rem]",
           isExporting && "w-24 min-w-[6rem]"
         )}
-        style={{
-          backgroundColor: row.color,
-          fontSize: `${row.labelFontSize || 16}px`,
-        }}
+        style={{ backgroundColor: row.color }}
       >
         {/* Inline editable tier name */}
         {isEditing && !isExporting ? (
-          <input
+          <textarea
             ref={inputRef}
-            type="text"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="h-full w-full rounded border-2 border-white/50 bg-transparent px-1 text-center font-bold outline-none"
+            rows={1}
+            aria-multiline="true"
+            className="w-full resize-none overflow-hidden border-none bg-transparent p-1 text-center font-bold outline-none break-words focus:ring-1 focus:ring-white/30"
             style={{
               color: textColor,
-              fontSize: `${row.labelFontSize || 16}px`,
+              fontSize: "14px",
+              lineHeight: "1.2",
+              wordBreak: "break-word",
             }}
-            maxLength={50}
           />
         ) : (
           <button
@@ -236,8 +242,12 @@ export function TierRow({
             aria-label={`Edit tier name: ${row.name || row.level}`}
           >
             <span
-              className="select-none drop-shadow-sm"
-              style={{ color: textColor }}
+              className="block w-full break-words p-1 text-center font-bold drop-shadow-sm"
+              style={{
+                color: textColor,
+                fontSize: "14px",
+                lineHeight: "1.2",
+              }}
             >
               {row.name || row.level}
             </span>
@@ -274,30 +284,10 @@ export function TierRow({
                 />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64" align="start" side="right">
+            <PopoverContent className="w-[90vw] sm:w-64 max-w-xs" align="start" side="right">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Label Font Size: {row.labelFontSize || 16}px</Label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="32"
-                    step="1"
-                    value={row.labelFontSize || 16}
-                    onChange={(e) => {
-                      updateTier(row.id, {
-                        labelFontSize: parseInt(e.target.value, 10),
-                      });
-                    }}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
-                  />
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>12px</span>
-                    <span>32px</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Color</Label>
+                  <span className="text-sm font-medium">Color</span>
                   <div
                     className="flex flex-wrap gap-2"
                     role="radiogroup"
@@ -313,7 +303,7 @@ export function TierRow({
                           "h-7 w-7 rounded-md border-2 transition-all hover:scale-110",
                           row.color === color
                             ? "border-primary ring-2 ring-primary/30"
-                            : "border-transparent hover:border-muted-foreground/50"
+                            : "border-border hover:border-primary/50"
                         )}
                         style={{ backgroundColor: color }}
                         onClick={() => updateTier(row.id, { color })}
@@ -366,12 +356,7 @@ export function TierRow({
       {/* Tier Content (Droppable Area) */}
       <div
         ref={setDroppableRef}
-        className={cn(
-          "flex min-h-[5rem] flex-1 flex-wrap content-start items-start gap-2 p-2 transition-all duration-200",
-          showDropHighlight
-            ? "bg-primary/10 ring-2 ring-inset ring-primary/40"
-            : "bg-muted/20"
-        )}
+        className="flex min-h-[5rem] flex-1 flex-wrap content-start items-start gap-2 bg-muted/20 p-2"
       >
         <SortableContext
           items={itemIds}
@@ -381,14 +366,7 @@ export function TierRow({
             <TierItem key={item.id} item={item} containerId={row.id} />
           ))}
         </SortableContext>
-
-        {/* Only show drop hint during drag, never during export */}
-        {row.items.length === 0 && showDropHighlight && !isExporting && (
-          <div className="flex h-full min-h-[3.5rem] w-full animate-pulse items-center justify-center text-sm font-medium text-primary">
-            Drop here
-          </div>
-        )}
       </div>
     </div>
   );
-}
+});

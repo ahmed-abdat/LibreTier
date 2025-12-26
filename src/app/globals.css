@@ -5,6 +5,13 @@
 /* Base HTML Styles */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 56px; /* Page header height */
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 112px; /* Page header + Editor header */
+  }
 }
 
 body {
@@ -33,9 +40,16 @@ body {
   @apply bg-primary/20 text-primary;
 }
 
-/* Focus Styles */
+/* Focus Styles - Enhanced for accessibility */
 :focus-visible {
   @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/* Ensure focus is visible in high contrast mode */
+@media (prefers-contrast: high) {
+  :focus-visible {
+    @apply ring-4 ring-offset-4;
+  }
 }
 
 /* Transition Styles */
@@ -123,46 +137,38 @@ body {
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
+/* Image fade-in animation for performance optimization */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-/* Brand Gradients */
-@layer utilities {
-  .brand-gradient-primary {
-    @apply bg-gradient-to-r from-[#3293CE] via-[#2F8CCA] to-[#30489C];
-  }
-
-  .brand-gradient-text {
-    @apply bg-gradient-to-r from-[#3293CE] via-[#2F8CCA] to-[#30489C] bg-clip-text text-transparent;
-  }
-
-  .brand-gradient-hover {
-    @apply transition-all duration-300 hover:bg-gradient-to-r hover:from-[#3293CE] hover:via-[#2F8CCA] hover:to-[#30489C];
-  }
-
-  .brand-gradient-border {
-    @apply border-2 border-transparent bg-gradient-to-r from-[#3293CE] via-[#2F8CCA] to-[#30489C] bg-clip-border;
+  to {
+    opacity: 1;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+/* Floating Action Bar Animations */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
   }
-  body {
-    @apply bg-background text-foreground;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* View Transitions API for animated theme toggle */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  @keyframes slideUpFade {
+    from, to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

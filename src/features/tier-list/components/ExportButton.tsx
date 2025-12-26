@@ -10,18 +10,19 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
 
 interface ExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement | null>;
   filename?: string;
   hasItems?: boolean;
+  isMobile?: boolean;
 }
 
 export function ExportButton({
   targetRef,
   filename = "tier-list",
   hasItems = false,
+  isMobile = false,
 }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
   const { resolvedTheme } = useTheme();
@@ -40,6 +41,20 @@ export function ExportButton({
     setIsExporting(true);
     const toastId = toast.loading("Generating image...");
 
+    let html2canvas;
+    try {
+      // Dynamic import html2canvas (4.1MB) - only load when user exports
+      const module = await import("html2canvas");
+      html2canvas = module.default;
+    } catch (importError) {
+      console.error("Failed to load export library:", importError);
+      toast.error("Failed to load export feature. Check your connection.", {
+        id: toastId,
+      });
+      setIsExporting(false);
+      return;
+    }
+
     try {
       // Small delay to ensure UI updates
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -49,7 +64,7 @@ export function ExportButton({
 
       const canvas = await html2canvas(targetRef.current, {
         backgroundColor,
-        scale: 2, // Higher quality
+        scale: 2,
         useCORS: true,
         logging: false,
         // Ensure all images are loaded
@@ -81,6 +96,19 @@ export function ExportButton({
           editButtons.forEach((btn) => {
             (btn as HTMLElement).style.display = "none";
           });
+          // Hide elements marked for export exclusion (e.g., Add Tier button)
+          const hideElements =
+            clonedDoc.body.querySelectorAll("[data-hide-export]");
+          hideElements.forEach((el) => {
+            (el as HTMLElement).style.display = "none";
+          });
+          // Show the title that's hidden in editor
+          const exportTitle = clonedDoc.body.querySelector(
+            "[data-export-title]"
+          );
+          if (exportTitle) {
+            (exportTitle as HTMLElement).style.display = "block";
+          }
         },
       });
 
@@ -115,8 +143,10 @@ export function ExportButton({
         );
       });
     } catch (error) {
-      console.error("Export error:", error);
-      toast.error("Failed to export tier list", { id: toastId });
+      console.error("Export rendering error:", error);
+      toast.error("Failed to render tier list. Try a smaller list.", {
+        id: toastId,
+      });
     } finally {
       setIsExporting(false);
     }
@@ -126,24 +156,28 @@ export function ExportButton({
 
   const button = (
     <Button
-      onClick={handleExport}
+      onClick={() => void handleExport()}
       disabled={isDisabled}
       variant="outline"
       aria-busy={isExporting}
       aria-label={
         isExporting ? "Exporting tier list" : "Export tier list as image"
       }
-      className={`h-10 px-3 sm:h-9 sm:px-4 ${!hasItems ? "cursor-not-allowed opacity-50" : ""}`}
+      className={`${isMobile ? "h-11 min-w-[44px] px-4" : "h-10 px-3 sm:h-9 sm:px-4"} ${!hasItems ? "cursor-not-allowed opacity-50" : ""}`}
     >
       {isExporting ? (
         <>
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          <span className="ml-2 hidden sm:inline">Exporting...</span>
+          <span className={`ml-2 ${isMobile ? "" : "hidden sm:inline"}`}>
+            Exporting...
+          </span>
         </>
       ) : (
         <>
           <Download className="h-4 w-4" aria-hidden="true" />
-          <span className="ml-2 hidden sm:inline">Export as Image</span>
+          <span className={`ml-2 ${isMobile ? "" : "hidden sm:inline"}`}>
+            Export
+          </span>
         </>
       )}
     </Button>

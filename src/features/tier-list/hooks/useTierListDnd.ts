@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   DragStartEvent,
   DragEndEvent,
@@ -38,7 +38,35 @@ export function useTierListDnd({
   const [activeDragType, setActiveDragType] = useState<ActiveDragType>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
-  // Find which container (tier or pool) an item belongs to
+  // O(1) lookup maps - rebuilt only when currentList changes
+  const { itemMap, itemContainerMap, rowMap } = useMemo(() => {
+    const itemMap = new Map<string, TierItem>();
+    const itemContainerMap = new Map<string, string | null>();
+    const rowMap = new Map<string, TierRow>();
+
+    if (!currentList) {
+      return { itemMap, itemContainerMap, rowMap };
+    }
+
+    // Map unassigned items
+    currentList.unassignedItems.forEach((item) => {
+      itemMap.set(item.id, item);
+      itemContainerMap.set(item.id, null);
+    });
+
+    // Map tier items and rows
+    currentList.rows.forEach((row) => {
+      rowMap.set(row.id, row);
+      row.items.forEach((item) => {
+        itemMap.set(item.id, item);
+        itemContainerMap.set(item.id, row.id);
+      });
+    });
+
+    return { itemMap, itemContainerMap, rowMap };
+  }, [currentList]);
+
+  // Find which container (tier or pool) an item belongs to - O(1)
   const findContainer = useCallback(
     (id: string): string | null => {
       if (!currentList) return null;
@@ -46,53 +74,36 @@ export function useTierListDnd({
       if (id === "unassigned-pool") return null;
       if (id.startsWith("tier-")) {
         const tierId = id.replace("tier-", "");
-        if (currentList.rows.some((r) => r.id === tierId)) return tierId;
+        if (rowMap.has(tierId)) return tierId;
       }
       if (id.startsWith("row-")) return id;
 
-      if (currentList.unassignedItems.some((item) => item.id === id)) {
-        return "unassigned";
-      }
-
-      for (const row of currentList.rows) {
-        if (row.items.some((item) => item.id === id)) {
-          return row.id;
-        }
+      // O(1) lookup for items via map
+      if (itemContainerMap.has(id)) {
+        const containerId = itemContainerMap.get(id);
+        return containerId === null ? "unassigned" : (containerId ?? null);
       }
 
       return null;
     },
-    [currentList]
+    [currentList, itemContainerMap, rowMap]
   );
 
-  // Find an item by ID
+  // Find an item by ID - O(1)
   const findItem = useCallback(
     (id: string): TierItem | undefined => {
-      if (!currentList) return undefined;
-
-      const unassignedItem = currentList.unassignedItems.find(
-        (item) => item.id === id
-      );
-      if (unassignedItem) return unassignedItem;
-
-      for (const row of currentList.rows) {
-        const item = row.items.find((item) => item.id === id);
-        if (item) return item;
-      }
-
-      return undefined;
+      return itemMap.get(id);
     },
-    [currentList]
+    [itemMap]
   );
 
-  // Find a row by ID
+  // Find a row by ID - O(1)
   const findRow = useCallback(
     (id: string): TierRow | undefined => {
-      if (!currentList) return undefined;
       const rowId = id.startsWith("row-") ? id.replace("row-", "") : id;
-      return currentList.rows.find((r) => r.id === rowId);
+      return rowMap.get(rowId);
     },
-    [currentList]
+    [rowMap]
   );
 
   // Get items for a container
@@ -133,10 +144,15 @@ export function useTierListDnd({
     [findItem, findRow]
   );
 
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    const { over } = event;
-    setOverId(over?.id as string | null);
-  }, []);
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const { over } = event;
+      // Only update visual feedback (overId) - don't move items during drag
+      // Actual moves happen in handleDragEnd when undo history is resumed
+      setOverId(over?.id as string | null);
+    },
+    []
+  );
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {

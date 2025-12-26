@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { X } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TierItem as TierItemType } from "../index";
 import { useTierStore } from "../store";
@@ -19,9 +20,12 @@ interface TierItemProps {
   isOverlay?: boolean;
 }
 
-export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
+export const TierItem = memo(function TierItem({
+  item,
+  containerId,
+  isOverlay,
+}: TierItemProps) {
   const deleteItem = useTierStore((state) => state.deleteItem);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   const {
@@ -44,29 +48,49 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
     transform: CSS.Transform.toString(transform),
     transition,
     WebkitTouchCallout: "none",
+    willChange: "transform",
   };
 
-  // Render image or fallback
-  const renderContent = (showLoadingState = true) => {
-    if (item.imageUrl && !imageError) {
-      return (
-        <>
-          {/* Loading skeleton */}
-          {showLoadingState && !imageLoaded && (
-            <div className="absolute inset-0 animate-pulse bg-muted" />
-          )}
+  // Show faded preview at drop position during drag
+  // This shows where the item will land when dropped
+  if (isDragging) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="h-[72px] w-[72px] overflow-hidden rounded-lg opacity-40"
+        {...attributes}
+        {...listeners}
+      >
+        {item.imageUrl && !imageError ? (
           <img
             src={item.imageUrl}
             alt={item.name}
-            className={cn(
-              "h-full w-full object-cover transition-opacity duration-200",
-              showLoadingState && !imageLoaded ? "opacity-0" : "opacity-100"
-            )}
+            loading="lazy"
+            className="h-full w-full object-cover"
             draggable={false}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
           />
-        </>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-secondary p-1.5 text-center text-[10px] font-medium leading-tight text-secondary-foreground">
+            <span className="line-clamp-3">{item.name}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Render image or fallback
+  const renderContent = () => {
+    if (item.imageUrl && !imageError) {
+      return (
+        <img
+          src={item.imageUrl}
+          alt={item.name}
+          loading="lazy"
+          className="h-full w-full object-cover animate-[fadeIn_0.2s_ease-in]"
+          draggable={false}
+          onError={() => setImageError(true)}
+        />
       );
     }
 
@@ -78,14 +102,19 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
     );
   };
 
-  // Drag overlay - shows while dragging
+  // Drag overlay - shows while dragging with smooth animation
   if (isOverlay) {
     return (
-      <div className="relative h-[72px] w-[72px] rotate-2 scale-110 overflow-hidden rounded-lg border-2 border-primary bg-background shadow-2xl">
-        {renderContent(false)}
+      <motion.div
+        initial={{ scale: 1, rotate: 0 }}
+        animate={{ scale: 1.1, rotate: 2 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+        className="relative h-[72px] w-[72px] overflow-hidden rounded-lg border-2 border-primary bg-background shadow-2xl"
+      >
+        {renderContent()}
         {/* Drag indicator overlay */}
         <div className="pointer-events-none absolute inset-0 bg-primary/15" />
-      </div>
+      </motion.div>
     );
   }
 
@@ -101,8 +130,7 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
             "group relative h-[72px] w-[72px] cursor-grab overflow-visible rounded-lg active:cursor-grabbing",
             "transition-all duration-150 ease-out",
             "hover:z-10",
-            "touch-none select-none",
-            isDragging && "scale-95 opacity-40"
+            "touch-none select-none"
           )}
         >
           {/* Main item container */}
@@ -111,9 +139,7 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
               "relative h-full w-full overflow-hidden rounded-lg",
               "border-2 transition-all duration-150",
               "shadow-sm hover:shadow-lg",
-              isDragging
-                ? "border-dashed border-primary bg-primary/10"
-                : "border-transparent hover:border-primary/60",
+              "border-transparent hover:border-primary/60",
               "group-hover:scale-105"
             )}
           >
@@ -163,4 +189,4 @@ export function TierItem({ item, containerId, isOverlay }: TierItemProps) {
       </TooltipContent>
     </Tooltip>
   );
-}
+});

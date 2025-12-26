@@ -4,6 +4,7 @@ export { TierItem } from "./TierItem";
 export { ItemPool } from "./ItemPool";
 export { ImageUpload } from "./ImageUpload";
 export { ExportButton } from "./ExportButton";
+export { FloatingActionBar } from "./FloatingActionBar";
 export { EmptyState } from "./EmptyState";
 export { TierListCard } from "./TierListCard";
 export { TierListGallery } from "./TierListGallery";
