@@ -10,7 +10,7 @@ Tier Maker is a modern web application for creating and sharing tier-based ranki
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 with App Router and Turbopack
+- **Framework**: Next.js 16 with App Router and Turbopack
 - **Language**: TypeScript (strict mode)
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **State Management**: Zustand with persist middleware (localStorage)
@@ -28,7 +28,9 @@ Tier Maker is a modern web application for creating and sharing tier-based ranki
 pnpm dev          # Start development server with Turbopack
 pnpm build        # Build for production
 pnpm start        # Start production server
-pnpm lint         # Run ESLint
+pnpm lint         # Run ESLint (with caching)
+pnpm lint:fix     # Run ESLint and auto-fix issues
+pnpm lint:strict  # Run ESLint with zero warnings (for CI)
 pnpm format       # Format code with Prettier
 pnpm test         # Run unit tests (watch mode)
 pnpm test:run     # Run unit tests once
@@ -147,8 +149,25 @@ When backend is needed:
 
 ## ESLint Configuration
 
-TypeScript ESLint with warnings (not errors) for:
+Uses ESLint 9 flat config (`eslint.config.mjs`) with:
 
-- `@typescript-eslint/no-explicit-any`
-- `@typescript-eslint/no-unused-vars`
-- `@typescript-eslint/no-empty-interface`
+- **Next.js**: `eslint-config-next/core-web-vitals` + `typescript`
+- **Prettier**: `eslint-config-prettier` for conflict resolution
+- **Type-aware linting**: Enabled via `parserOptions.projectService`
+
+### Key Rules (Errors)
+
+- `@typescript-eslint/no-floating-promises` - Catch unhandled promises
+- `@typescript-eslint/no-misused-promises` - Prevent async in wrong contexts
+- `@typescript-eslint/await-thenable` - Only await actual promises
+- `react-hooks/rules-of-hooks` - Enforce hooks rules
+- `react/jsx-key` - Require keys in lists
+
+### Key Rules (Warnings)
+
+- `@typescript-eslint/no-unused-vars` - Unused variables (allows `_` prefix)
+- `@typescript-eslint/no-explicit-any` - Discourage `any` type
+- `@typescript-eslint/prefer-nullish-coalescing` - Use `??` over `||`
+- `@typescript-eslint/consistent-type-imports` - Use `import type`
+- `react-hooks/exhaustive-deps` - Check effect dependencies
+- `no-console` - Only allow `console.warn` and `console.error`
