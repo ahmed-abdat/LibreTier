@@ -3,14 +3,15 @@ import { persist } from "zustand/middleware";
 import { useStore } from "zustand";
 import { temporal, TemporalState } from "zundo";
 import { v4 as uuidv4 } from "uuid";
+import pako from "pako";
+import { toast } from "sonner";
 import { TierLevel, TIER_COLORS, TIER_LEVELS } from "../constants";
-import { TierItem, TierRow, TierList, DragState } from "../index";
+import { TierItem, TierRow, TierList } from "../index";
 
 interface TierStore {
   // State
   tierLists: TierList[]; // All saved tier lists
   currentListId: string | null; // Currently editing list
-  dragState: DragState;
 
   // Computed
   getCurrentList: () => TierList | null;
@@ -50,18 +51,7 @@ interface TierStore {
     items: TierItem[]
   ) => void;
   clearAllItems: () => void;
-
-  // Drag State Actions
-  setDragState: (state: Partial<DragState>) => void;
-  resetDragState: () => void;
 }
-
-const initialDragState: DragState = {
-  isDragging: false,
-  draggedItemId: undefined,
-  sourceRowId: undefined,
-  targetRowId: undefined,
-};
 
 // Helper to create a new tier list
 const createNewTierList = (title: string): TierList => ({
@@ -73,14 +63,12 @@ const createNewTierList = (title: string): TierList => ({
     color: TIER_COLORS[level],
     items: [],
     name: level,
-    labelFontSize: 16, // Default font size for tier labels
   })),
   unassignedItems: [],
   createdBy: "local-user",
   isPublic: false,
   createdAt: new Date(),
   updatedAt: new Date(),
-  titleFontSize: 24, // Default font size for title
 });
 
 // Type for partialized state (only what we track in history)
@@ -93,7 +81,6 @@ export const useTierStore = create<TierStore>()(
         // Initial State
         tierLists: [],
         currentListId: null,
-        dragState: initialDragState,
 
         // Computed - Get current list
         getCurrentList: () => {
@@ -173,15 +160,6 @@ export const useTierStore = create<TierStore>()(
               updates = { ...updates, title: updates.title.slice(0, 200) };
             }
 
-            // Validate titleFontSize if provided
-            if (updates.titleFontSize !== undefined) {
-              const fontSize = Math.max(
-                12,
-                Math.min(48, updates.titleFontSize)
-              );
-              updates = { ...updates, titleFontSize: fontSize };
-            }
-
             return {
               tierLists: state.tierLists.map((list) =>
                 list.id === state.currentListId
@@ -202,7 +180,6 @@ export const useTierStore = create<TierStore>()(
               color: TIER_COLORS[level] || "#808080",
               items: [],
               name: level,
-              labelFontSize: 16, // Default font size for tier labels
             };
 
             return {
@@ -236,7 +213,6 @@ export const useTierStore = create<TierStore>()(
               color,
               items: [],
               name: trimmedName.slice(0, 10),
-              labelFontSize: 16, // Default font size for tier labels
             };
 
             return {
@@ -260,22 +236,13 @@ export const useTierStore = create<TierStore>()(
             if (updates.name !== undefined) {
               const trimmedName = updates.name.trim();
               if (!trimmedName) return state; // Reject empty names
-              updates = { ...updates, name: trimmedName.slice(0, 10) };
+              updates = { ...updates, name: trimmedName.slice(0, 100) };
             }
 
             // Validate color if provided (must be valid hex)
             if (updates.color !== undefined) {
               const hexRegex = /^#[0-9A-Fa-f]{6}$/;
               if (!hexRegex.test(updates.color)) return state;
-            }
-
-            // Validate labelFontSize if provided
-            if (updates.labelFontSize !== undefined) {
-              const fontSize = Math.max(
-                10,
-                Math.min(32, updates.labelFontSize)
-              );
-              updates = { ...updates, labelFontSize: fontSize };
             }
 
             return {
@@ -604,20 +571,9 @@ export const useTierStore = create<TierStore>()(
               ),
             };
           }),
-
-        // Drag State Actions
-        setDragState: (dragState) =>
-          set((prev) => ({
-            dragState: { ...prev.dragState, ...dragState },
-          })),
-
-        resetDragState: () =>
-          set({
-            dragState: initialDragState,
-          }),
       }),
       {
-        // Only track tierLists changes, not currentListId or dragState
+        // Only track tierLists changes, not currentListId
         partialize: (state): PartializedTierState => ({
           tierLists: state.tierLists,
         }),
@@ -638,7 +594,22 @@ export const useTierStore = create<TierStore>()(
           try {
             const str = localStorage.getItem(name);
             if (!str) return null;
-            const data = JSON.parse(str);
+
+            let data;
+            // Try decompressing (new format)
+            try {
+              const compressed = Uint8Array.from(atob(str), c => c.charCodeAt(0));
+              const decompressed = pako.inflate(compressed, { to: 'string' });
+              data = JSON.parse(decompressed);
+            } catch (compressionError) {
+              // Fallback to uncompressed (legacy format)
+              console.warn(
+                "Failed to decompress storage, using legacy format:",
+                compressionError instanceof Error ? compressionError.message : compressionError
+              );
+              data = JSON.parse(str);
+            }
+
             // Revive Date objects from ISO strings
             if (data.state?.tierLists) {
               data.state.tierLists = data.state.tierLists.map(
@@ -681,13 +652,22 @@ export const useTierStore = create<TierStore>()(
         setItem: (name, value) => {
           if (typeof window === "undefined") return;
           try {
-            localStorage.setItem(name, JSON.stringify(value));
+            const json = JSON.stringify(value);
+            // Compress using pako (60-70% size reduction)
+            const compressed = pako.deflate(json);
+            // Convert to base64 in chunks to avoid call stack limit
+            let binary = '';
+            for (let i = 0; i < compressed.length; i++) {
+              binary += String.fromCharCode(compressed[i]);
+            }
+            const base64 = btoa(binary);
+            localStorage.setItem(name, base64);
           } catch (error) {
             console.error("Failed to save to localStorage:", error);
             if (error instanceof Error && error.name === "QuotaExceededError") {
-              console.warn(
-                "Storage quota exceeded. Consider removing old tier lists."
-              );
+              toast.error("Storage full. Delete old tier lists to save changes.");
+            } else {
+              toast.error("Failed to save. Your changes may not persist.");
             }
           }
         },
@@ -708,3 +688,22 @@ export const useTierStore = create<TierStore>()(
 export const useTemporalStore = <T>(
   selector: (state: TemporalState<PartializedTierState>) => T
 ): T => useStore(useTierStore.temporal, selector);
+
+// Fine-grained selectors for performance optimization
+
+/**
+ * Stable action selectors - returns tier manipulation functions
+ * These never change, so components using them won't re-render unless other props change
+ */
+export const useTierActions = () =>
+  useTierStore((state) => ({
+    updateTier: state.updateTier,
+    deleteTier: state.deleteTier,
+    clearTierItems: state.clearTierItems,
+  }));
+
+/**
+ * Gallery metadata selector - returns only tierLists reference
+ * Computation is done in the consuming component with useMemo
+ */
+export const useTierLists = () => useTierStore((state) => state.tierLists);

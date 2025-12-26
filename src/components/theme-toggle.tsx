@@ -117,7 +117,7 @@ export function ThemeToggle({
       ref={buttonRef}
       variant="outline"
       size="icon"
-      onClick={toggleTheme}
+      onClick={() => void toggleTheme()}
       className={cn("group relative overflow-hidden bg-background", className)}
       {...props}
     >

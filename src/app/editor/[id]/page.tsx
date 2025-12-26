@@ -16,7 +16,11 @@ export default function EditorPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
-  const { tierLists, selectList } = useTierStore();
+  // Optimize: selective subscriptions to prevent re-renders
+  const listExists = useTierStore((state) =>
+    state.tierLists.some((list) => list.id === (params.id as string))
+  );
+  const selectList = useTierStore((state) => state.selectList);
   const id = params.id as string;
 
   // Handle hydration and select the list
@@ -26,9 +30,6 @@ export default function EditorPage() {
       selectList(id);
     }
   }, [id, selectList]);
-
-  // Check if list exists after mounting
-  const listExists = tierLists.some((list) => list.id === id);
 
   // Show loading state
   if (!mounted) {
@@ -47,7 +48,7 @@ export default function EditorPage() {
     return (
       <div className="flex min-h-screen flex-col">
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+          <div className="container mx-auto flex h-12 max-w-6xl items-center justify-between px-4 md:h-14">
             <Link href="/" className="flex items-center gap-2">
               <Logo size={40} />
               <h1 className="text-xl font-bold">Tier List</h1>
@@ -82,13 +83,13 @@ export default function EditorPage() {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+        <div className="container mx-auto flex h-12 max-w-5xl items-center justify-between px-4 md:h-14">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => router.back()}
-              className="shrink-0"
+              className="h-11 w-11 shrink-0 md:h-10 md:w-10"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -102,7 +103,7 @@ export default function EditorPage() {
           </div>
         </div>
       </header>
-      <main className="container mx-auto max-w-5xl p-4">
+      <main className="container mx-auto max-w-5xl p-4 pb-24 md:pb-4">
         <TierListEditor />
       </main>
     </div>

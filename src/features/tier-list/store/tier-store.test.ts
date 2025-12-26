@@ -7,12 +7,6 @@ describe("TierStore", () => {
     useTierStore.setState({
       tierLists: [],
       currentListId: null,
-      dragState: {
-        isDragging: false,
-        draggedItemId: undefined,
-        sourceRowId: undefined,
-        targetRowId: undefined,
-      },
     });
   });
 
@@ -325,28 +319,7 @@ describe("TierStore", () => {
     });
   });
 
-  describe("dragState", () => {
-    it("should set drag state", () => {
-      const { setDragState } = useTierStore.getState();
-
-      setDragState({ isDragging: true, draggedItemId: "item-1" });
-
-      const state = useTierStore.getState();
-      expect(state.dragState.isDragging).toBe(true);
-      expect(state.dragState.draggedItemId).toBe("item-1");
-    });
-
-    it("should reset drag state", () => {
-      const { setDragState, resetDragState } = useTierStore.getState();
-
-      setDragState({ isDragging: true, draggedItemId: "item-1" });
-      resetDragState();
-
-      const state = useTierStore.getState();
-      expect(state.dragState.isDragging).toBe(false);
-      expect(state.dragState.draggedItemId).toBeUndefined();
-    });
-  });
+  // dragState tests removed - moved to separate drag-store.ts
 
   describe("reorderTiers", () => {
     it("should reorder tiers", () => {
