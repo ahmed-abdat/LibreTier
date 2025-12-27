@@ -19,7 +19,6 @@ export const metadata: Metadata = {
   title: "Tier List - Create Beautiful Tier Lists",
   description:
     "Rank anything with customizable tier lists. Upload images, drag to organize, and export to share with friends.",
-  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
