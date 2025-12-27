@@ -5,16 +5,29 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { roboto } from "./font";
-import { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tier-maker-nine.vercel.app"),
   title: "Tier List - Create Beautiful Tier Lists",
   description:
     "Rank anything with customizable tier lists. Upload images, drag to organize, and export to share with friends.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Tier List",
+  },
   icons: {
     icon: "/favicon.ico",
-    apple: "/tier_list_logo.png",
+    apple: "/icons/apple-touch-icon.png",
   },
   openGraph: {
     title: "Tier List - Create Beautiful Tier Lists",
