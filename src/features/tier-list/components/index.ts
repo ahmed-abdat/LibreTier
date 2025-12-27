@@ -3,6 +3,7 @@ export { TierRow } from "./TierRow";
 export { TierItem } from "./TierItem";
 export { ItemPool } from "./ItemPool";
 export { ImageUpload } from "./ImageUpload";
+export { TextItemInput } from "./TextItemInput";
 export { ExportButton } from "./ExportButton";
 export { FloatingActionBar } from "./FloatingActionBar";
 export { EmptyState } from "./EmptyState";

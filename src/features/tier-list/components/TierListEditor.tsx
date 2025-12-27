@@ -34,13 +34,15 @@ import { TierRow } from "./TierRow";
 import { TierItem } from "./TierItem";
 import { ItemPool } from "./ItemPool";
 import { ImageUpload } from "./ImageUpload";
+import { TextItemInput } from "./TextItemInput";
 import { ExportButton } from "./ExportButton";
 import { ExportJSONDialog } from "./ExportJSONDialog";
 import { FloatingActionBar } from "./FloatingActionBar";
 
 // Code split SettingsDialog - only load when user opens settings
 const SettingsDialog = dynamic(
-  () => import("./SettingsDialog").then((mod) => ({ default: mod.SettingsDialog })),
+  () =>
+    import("./SettingsDialog").then((mod) => ({ default: mod.SettingsDialog })),
   { ssr: false }
 );
 import { useTierListDnd } from "../hooks/useTierListDnd";
@@ -83,7 +85,9 @@ export function TierListEditor() {
   const clearAllItems = useTierStore((state) => state.clearAllItems);
   const moveItem = useTierStore((state) => state.moveItem);
   const reorderTiers = useTierStore((state) => state.reorderTiers);
-  const reorderItemsInContainer = useTierStore((state) => state.reorderItemsInContainer);
+  const reorderItemsInContainer = useTierStore(
+    (state) => state.reorderItemsInContainer
+  );
   const addCustomTier = useTierStore((state) => state.addCustomTier);
 
   const settings = useSettingsStore((state) => state.settings);
@@ -574,6 +578,14 @@ export function TierListEditor() {
 
         {/* Image Upload - At the bottom for adding new items */}
         <ImageUpload />
+
+        {/* Text-only item input */}
+        <div className="flex items-center gap-4">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs text-muted-foreground">or</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+        <TextItemInput />
 
         {/* Drag Overlay - always show for drag feedback, only disable animation */}
         <DragOverlay
