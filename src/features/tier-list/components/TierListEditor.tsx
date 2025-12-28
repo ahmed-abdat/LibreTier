@@ -284,6 +284,18 @@ export function TierListEditor() {
     []
   );
 
+  // Select all text on focus for easier editing
+  const handleTitleFocus = useCallback(() => {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    const target = document.activeElement;
+    if (selection && target) {
+      range.selectNodeContents(target);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }, []);
+
   if (!currentList) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -305,9 +317,10 @@ export function TierListEditor() {
               contentEditable
               suppressContentEditableWarning
               onBlur={handleTitleBlur}
+              onFocus={handleTitleFocus}
               onKeyDown={handleTitleKeyDown}
               onPaste={handleTitlePaste}
-              className="hover:border-muted-foreground/30 focus:border-primary/50 focus:bg-muted/20 max-w-[calc(100vw-6rem)] cursor-text rounded-md border-2 border-transparent px-2 py-1 text-xl font-bold wrap-break-word outline-hidden transition-all hover:border-dashed focus:border-solid sm:max-w-[600px] sm:text-2xl md:text-3xl"
+              className="hover:border-muted-foreground/30 focus:border-primary/50 focus:bg-muted/20 max-w-[calc(100vw-5rem)] cursor-text rounded-md border-2 border-transparent px-2 py-1 text-xl font-bold outline-hidden transition-all hover:border-dashed focus:border-solid sm:max-w-[500px] sm:text-2xl md:max-w-[600px] md:text-3xl"
             >
               {currentList.title}
             </h1>
