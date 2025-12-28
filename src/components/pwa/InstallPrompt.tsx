@@ -22,7 +22,7 @@ declare global {
 }
 
 const DISMISSED_KEY = "pwa-install-dismissed";
-const DISMISSED_EXPIRY_DAYS = 7;
+const DISMISSED_EXPIRY_DAYS = 1;
 
 // iOS Safari share icon
 function ShareIcon({ className }: { className?: string }) {
