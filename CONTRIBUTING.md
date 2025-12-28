@@ -1,6 +1,6 @@
-# Contributing to Tier Maker
+# Contributing to LibreTier
 
-Thank you for your interest in contributing to Tier Maker! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to LibreTier! This document provides guidelines and instructions for contributing.
 
 ## Table of Contents
 
@@ -25,12 +25,12 @@ This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participatin
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/tier-maker.git
-   cd tier-maker
+   git clone https://github.com/YOUR_USERNAME/libretier.git
+   cd libretier
    ```
 3. Add the upstream repository:
    ```bash
-   git remote add upstream https://github.com/ahmed-abdat/tier-maker.git
+   git remote add upstream https://github.com/ahmed-abdat/libretier.git
    ```
 4. Create a new branch for your work:
    ```bash
@@ -377,4 +377,4 @@ If you have questions:
 - Open a new discussion for general questions
 - Open an issue for specific bugs or features
 
-Thank you for contributing to Tier Maker!
+Thank you for contributing to LibreTier!

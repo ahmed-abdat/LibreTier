@@ -1,11 +1,13 @@
 {
-  "name": "tier-maker",
+  "name": "libretier",
   "version": "1.0.0",
-  "description": "A modern, open-source tier list maker with drag-and-drop functionality. Create, customize, and export tier-based rankings as images.",
+  "description": "LibreTier - A free, open-source tier list maker. Create, customize, and share tier-based rankings with drag-and-drop simplicity.",
   "keywords": [
+    "libretier",
     "tier-list",
     "tier-maker",
     "ranking",
+    "open-source",
     "drag-and-drop",
     "react",
     "nextjs",
@@ -15,12 +17,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ahmed-abdat/tier-maker.git"
+    "url": "https://github.com/ahmed-abdat/libretier.git"
   },
   "bugs": {
-    "url": "https://github.com/ahmed-abdat/tier-maker/issues"
+    "url": "https://github.com/ahmed-abdat/libretier/issues"
   },
-  "homepage": "https://github.com/ahmed-abdat/tier-maker#readme",
+  "homepage": "https://github.com/ahmed-abdat/libretier#readme",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

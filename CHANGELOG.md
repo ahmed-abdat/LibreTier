@@ -112,5 +112,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | ------- | ---------- | ---------------------- |
 | 1.0.0   | 2024-12-18 | Initial public release |
 
-[Unreleased]: https://github.com/ahmed-abdat/tier-maker/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/ahmed-abdat/tier-maker/releases/tag/v1.0.0
+[Unreleased]: https://github.com/ahmed-abdat/libretier/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/ahmed-abdat/libretier/releases/tag/v1.0.0

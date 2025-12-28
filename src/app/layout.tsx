@@ -15,30 +15,30 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tier-maker-nine.vercel.app"),
-  title: "Tier List - Create Beautiful Tier Lists",
+  metadataBase: new URL("https://libretier.vercel.app"),
+  title: "LibreTier - Free Open Source Tier List Maker",
   description:
-    "Rank anything with customizable tier lists. Upload images, drag to organize, and export to share with friends.",
+    "LibreTier is a free, open-source tier list maker. Rank anything with customizable tiers, drag-and-drop, and export to share.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Tier List",
+    title: "LibreTier",
   },
   icons: {
     icon: "/favicon.ico",
     apple: "/icons/apple-touch-icon.png",
   },
   openGraph: {
-    title: "Tier List - Create Beautiful Tier Lists",
+    title: "LibreTier - Free Open Source Tier List Maker",
     description:
-      "Rank anything with customizable tier lists. Upload images, drag to organize, and export to share with friends.",
+      "LibreTier is a free, open-source tier list maker. Rank anything with customizable tiers, drag-and-drop, and export to share.",
     images: ["/tier_list_logo.png"],
   },
   twitter: {
     card: "summary",
-    title: "Tier List - Create Beautiful Tier Lists",
+    title: "LibreTier - Free Open Source Tier List Maker",
     description:
-      "Rank anything with customizable tier lists. Upload images, drag to organize, and export to share with friends.",
+      "LibreTier is a free, open-source tier list maker. Rank anything with customizable tiers, drag-and-drop, and export to share.",
     images: ["/tier_list_logo.png"],
   },
 };

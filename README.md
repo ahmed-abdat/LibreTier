@@ -1,15 +1,15 @@
-# Tier Maker
+# LibreTier
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8)](https://tailwindcss.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8)](https://tailwindcss.com/)
 
-A free, open-source web app for creating tier-based rankings. Drag and drop images into customizable tiers, export your creations, and share them with friends. No account required - everything runs in your browser.
+A free, open-source tier list maker. Create beautiful rankings with drag-and-drop, export as images, and share with friends. No account required - everything runs in your browser.
 
-[Live Demo](https://tier-maker-mu.vercel.app) · [Report Bug](https://github.com/ahmed-abdat/tier-maker/issues) · [Request Feature](https://github.com/ahmed-abdat/tier-maker/issues)
+[Live Demo](https://libretier.vercel.app) · [Report Bug](https://github.com/ahmed-abdat/libretier/issues) · [Request Feature](https://github.com/ahmed-abdat/libretier/issues)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ahmed-abdat/tier-maker)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ahmed-abdat/libretier)
 
 <!-- Add your demo GIF here -->
 <!-- ![Demo](./assets/demo.gif) -->
@@ -18,7 +18,7 @@ A free, open-source web app for creating tier-based rankings. Drag and drop imag
 
 - **Privacy-first**: Your data stays in your browser. No tracking, no accounts, no server uploads (unless you choose to share)
 - **Works offline**: Once loaded, works without internet. All data stored locally
-- **Fully featured**: Not a toy project - this is a production-ready tier maker with real features
+- **Fully featured**: Not a toy project - this is a production-ready tier list maker with real features
 - **Open source**: MIT licensed, contributions welcome
 
 ## Features
@@ -73,8 +73,8 @@ A free, open-source web app for creating tier-based rankings. Drag and drop imag
 
 ```bash
 # Clone the repository
-git clone https://github.com/ahmed-abdat/tier-maker.git
-cd tier-maker
+git clone https://github.com/ahmed-abdat/libretier.git
+cd libretier
 
 # Install dependencies
 pnpm install

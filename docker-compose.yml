@@ -1,5 +1,5 @@
 services:
-  tier-maker:
+  libretier:
     build:
       context: .
       dockerfile: Dockerfile
