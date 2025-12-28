@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Tier List Maker",
-    short_name: "Tier List",
+    name: "LibreTier - Free Tier List Maker",
+    short_name: "LibreTier",
     description:
-      "Create beautiful tier lists with drag-and-drop. No account required.",
+      "Create beautiful tier lists with drag-and-drop. No login, no ads, no tracking. Works offline.",
     start_url: "/",
     display: "standalone",
     background_color: "#0a0a0a",
@@ -32,5 +32,6 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     categories: ["utilities", "entertainment"],
+    prefer_related_applications: false,
   };
 }

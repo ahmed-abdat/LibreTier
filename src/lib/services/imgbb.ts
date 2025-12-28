@@ -10,6 +10,11 @@ export interface BatchUploadProgress {
   completed: UploadResult[];
 }
 
+export interface UploadOptions {
+  customApiKey?: string;
+  signal?: AbortSignal;
+}
+
 interface UploadApiResponse {
   success: boolean;
   url?: string;
@@ -22,14 +27,18 @@ interface UploadApiResponse {
 export async function uploadImage(
   base64Image: string,
   name?: string,
-  signal?: AbortSignal
+  options?: UploadOptions
 ): Promise<UploadResult> {
   try {
     const response = await fetch("/api/upload", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: base64Image, name }),
-      signal,
+      body: JSON.stringify({
+        image: base64Image,
+        name,
+        customApiKey: options?.customApiKey,
+      }),
+      signal: options?.signal,
     });
 
     const result = (await response.json()) as UploadApiResponse;
@@ -62,33 +71,29 @@ export async function uploadImage(
  */
 export async function uploadImages(
   images: Array<{ id: string; base64: string; name?: string }>,
-  onProgress?: (progress: BatchUploadProgress) => void,
-  signal?: AbortSignal
+  onProgress?: (current: number, total: number) => void,
+  options?: UploadOptions
 ): Promise<Map<string, string>> {
   const urlMap = new Map<string, string>();
-  const completed: UploadResult[] = [];
   const delayMs = 500;
 
   for (let i = 0; i < images.length; i++) {
-    if (signal?.aborted) break;
+    if (options?.signal?.aborted) break;
 
     const { id, base64, name } = images[i];
 
-    const result = await uploadImage(base64, name, signal);
-    completed.push(result);
+    const result = await uploadImage(base64, name, options);
 
     if (result.success && result.url) {
       urlMap.set(id, result.url);
+    } else if (!result.success && result.error !== "Cancelled") {
+      throw new Error(result.error ?? "Upload failed");
     }
 
-    onProgress?.({
-      current: i + 1,
-      total: images.length,
-      completed,
-    });
+    onProgress?.(i + 1, images.length);
 
     // Delay between uploads (except for last one)
-    if (i < images.length - 1 && !signal?.aborted) {
+    if (i < images.length - 1 && !options?.signal?.aborted) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }

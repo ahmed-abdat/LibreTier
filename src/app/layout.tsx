@@ -2,6 +2,7 @@
 // is required, even if it's just passing children through.
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { InstallPrompt } from "@/components/pwa";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { roboto } from "./font";
@@ -66,6 +67,7 @@ export default function RootLayout({
           </TooltipProvider>
         </ThemeProvider>
         <Toaster position="top-center" duration={2000} richColors />
+        <InstallPrompt />
       </body>
     </html>
   );

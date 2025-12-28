@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Simple settings - just on/off toggles
+// Simple settings - just on/off toggles + custom API key
 export interface EditorSettings {
   enableKeyboardNavigation: boolean;
   enableUndoRedo: boolean;
   reduceAnimations: boolean;
+  imgbbApiKey: string; // Empty = use default, non-empty = use custom
 }
 
 // Default values - all features disabled, animations reduced for max performance
@@ -13,6 +14,7 @@ const DEFAULT_SETTINGS: EditorSettings = {
   enableKeyboardNavigation: false,
   enableUndoRedo: false,
   reduceAnimations: true,
+  imgbbApiKey: "",
 };
 
 interface SettingsStore {

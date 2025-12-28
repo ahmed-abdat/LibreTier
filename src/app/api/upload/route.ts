@@ -18,20 +18,29 @@ export interface ImgBBUploadResponse {
 
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.IMGBB_API_KEY;
+    const body = await request.json();
+    const { image, name, customApiKey } = body as {
+      image: string;
+      name?: string;
+      customApiKey?: string;
+    };
+
+    // Use custom API key if provided, otherwise fall back to environment variable
+    const apiKey = customApiKey ?? process.env.IMGBB_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
         {
           success: false,
-          error: { message: "Image upload service not configured", code: 503 },
+          error: {
+            message:
+              "Image upload service not configured. Please add your own ImgBB API key in Settings.",
+            code: 503,
+          },
         },
         { status: 503 }
       );
     }
-
-    const body = await request.json();
-    const { image, name } = body as { image: string; name?: string };
 
     if (!image) {
       return NextResponse.json(

@@ -9,7 +9,7 @@ import {
   formatFileSize,
   getItemsWithBase64Images,
 } from "../utils/json-export";
-import { uploadImages, type BatchUploadProgress } from "@/lib/services/imgbb";
+import { uploadImages } from "@/lib/services/imgbb";
 
 export type ExportMode = "backup" | "shareable";
 export type ExportState = "idle" | "uploading" | "success" | "error";
@@ -19,11 +19,16 @@ interface UseShareableExportOptions {
   onSuccess?: () => void;
 }
 
+interface UploadProgress {
+  current: number;
+  total: number;
+}
+
 interface UseShareableExportResult {
   exportMode: ExportMode;
   setExportMode: (mode: ExportMode) => void;
   exportState: ExportState;
-  uploadProgress: BatchUploadProgress | null;
+  uploadProgress: UploadProgress | null;
   currentImageName: string;
   shareableEnabled: boolean | null;
   handleExport: () => Promise<void>;
@@ -39,8 +44,9 @@ export function useShareableExport({
 }: UseShareableExportOptions): UseShareableExportResult {
   const [exportMode, setExportMode] = useState<ExportMode>("backup");
   const [exportState, setExportState] = useState<ExportState>("idle");
-  const [uploadProgress, setUploadProgress] =
-    useState<BatchUploadProgress | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(
+    null
+  );
   const [currentImageName, setCurrentImageName] = useState<string>("");
   const [shareableEnabled, setShareableEnabled] = useState<boolean | null>(
     null
@@ -150,18 +156,17 @@ export function useShareableExport({
         setUploadProgress({
           current: 0,
           total: itemsWithImages.length,
-          completed: [],
         });
 
         const signal = abortControllerRef.current.signal;
         const imageUrlMap = await uploadImages(
           itemsWithImages,
-          (p) => {
+          (current, total) => {
             if (signal.aborted) return;
-            setUploadProgress(p);
-            setCurrentImageName(itemsWithImages[p.current - 1].name);
+            setUploadProgress({ current, total });
+            setCurrentImageName(itemsWithImages[current - 1]?.name ?? "");
           },
-          signal
+          { signal }
         );
 
         if (signal.aborted) {

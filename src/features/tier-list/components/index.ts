@@ -9,3 +9,4 @@ export { FloatingActionBar } from "./FloatingActionBar";
 export { EmptyState } from "./EmptyState";
 export { TierListCard } from "./TierListCard";
 export { TierListGallery } from "./TierListGallery";
+export { ShareDialog } from "./ShareDialog";

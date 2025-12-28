@@ -2,8 +2,10 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { ExportButton } from "./ExportButton";
+import { ShareDialog } from "./ShareDialog";
 import dynamic from "next/dynamic";
 import { useSettingsStore } from "../store/settings-store";
+import type { TierList } from "../index";
 
 const SettingsDialog = dynamic(
   () =>
@@ -15,12 +17,14 @@ interface FloatingActionBarProps {
   exportTargetRef: React.RefObject<HTMLDivElement | null>;
   filename: string;
   hasItems: boolean;
+  tierList: TierList | null;
 }
 
 export function FloatingActionBar({
   exportTargetRef,
   filename,
   hasItems,
+  tierList,
 }: FloatingActionBarProps) {
   const reduceAnimations = useSettingsStore(
     (state) => state.settings.reduceAnimations
@@ -39,6 +43,9 @@ export function FloatingActionBar({
           hasItems={hasItems}
           isMobile
         />
+
+        {/* Share Button - Mobile optimized */}
+        <ShareDialog tierList={tierList} isMobile />
 
         {/* Settings Button - Mobile optimized */}
         <SettingsDialog isMobile />
