@@ -129,15 +129,15 @@ export const TierRow = memo(function TierRow({
 
         {/* Tier Label */}
         <div
-          className="flex w-14 min-w-14 shrink-0 items-center justify-center p-1 font-bold sm:w-24 sm:min-w-24"
+          className="flex w-16 min-w-16 shrink-0 items-center justify-center p-2 font-bold sm:w-24 sm:min-w-24"
           style={{ backgroundColor: row.color }}
         >
           <span
             className="block w-full text-center font-bold wrap-break-word drop-shadow-xs"
             style={{
               color: textColor,
-              fontSize: "14px",
-              lineHeight: "1.2",
+              fontSize: "13px",
+              lineHeight: "1.3",
             }}
           >
             {row.name ?? row.level}
@@ -206,7 +206,7 @@ export const TierRow = memo(function TierRow({
       {/* Tier Label */}
       <div
         className={cn(
-          "group relative flex w-14 min-w-14 shrink-0 items-center justify-center font-bold sm:w-24 sm:min-w-24",
+          "group relative flex w-16 min-w-16 shrink-0 items-center justify-center p-1 font-bold sm:w-24 sm:min-w-24 sm:p-0",
           isExporting && "w-24 min-w-24"
         )}
         style={{ backgroundColor: row.color }}
@@ -240,11 +240,11 @@ export const TierRow = memo(function TierRow({
             aria-label={`Edit tier name: ${row.name ?? row.level}`}
           >
             <span
-              className="block w-full p-1 text-center font-bold wrap-break-word drop-shadow-xs"
+              className="block w-full p-1.5 text-center font-bold wrap-break-word drop-shadow-xs sm:p-1"
               style={{
                 color: textColor,
-                fontSize: "14px",
-                lineHeight: "1.2",
+                fontSize: "13px",
+                lineHeight: "1.3",
               }}
             >
               {row.name ?? row.level}
