@@ -27,7 +27,7 @@ self.addEventListener("install", (event) => {
     })()
   );
   // Force activation without waiting
-  self.skipWaiting();
+  void self.skipWaiting();
 });
 
 // Claim clients immediately on activation
