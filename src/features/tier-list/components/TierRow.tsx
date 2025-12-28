@@ -123,13 +123,13 @@ export const TierRow = memo(function TierRow({
     return (
       <div className="border-primary bg-background flex rounded-lg border-2 opacity-95 shadow-2xl">
         {/* Drag Handle */}
-        <div className="bg-muted/50 flex w-10 cursor-grabbing items-center justify-center border-r sm:w-8">
-          <GripVertical className="text-primary h-6 w-6 sm:h-5 sm:w-5" />
+        <div className="bg-muted/50 flex w-8 cursor-grabbing items-center justify-center border-r">
+          <GripVertical className="text-primary h-5 w-5" />
         </div>
 
         {/* Tier Label */}
         <div
-          className="flex w-16 min-w-16 shrink-0 items-center justify-center p-1 font-bold sm:w-24 sm:min-w-24"
+          className="flex w-12 min-w-12 shrink-0 items-center justify-center p-1 font-bold sm:w-24 sm:min-w-24"
           style={{ backgroundColor: row.color }}
         >
           <span
@@ -193,20 +193,20 @@ export const TierRow = memo(function TierRow({
           aria-roledescription="draggable"
           data-drag-handle
           className={cn(
-            "border-border bg-muted/20 flex w-10 cursor-grab items-center justify-center border-r active:cursor-grabbing sm:w-8",
+            "border-border bg-muted/20 flex w-8 cursor-grab items-center justify-center border-r active:cursor-grabbing",
             "group/handle hover:bg-primary/10 active:bg-primary/20 transition-all duration-150",
             "touch-none select-none"
           )}
           title="Drag to reorder"
         >
-          <GripVertical className="text-muted-foreground/50 group-hover/handle:text-primary h-6 w-6 transition-colors sm:h-5 sm:w-5" />
+          <GripVertical className="text-muted-foreground/50 group-hover/handle:text-primary h-5 w-5 transition-colors" />
         </div>
       )}
 
       {/* Tier Label */}
       <div
         className={cn(
-          "group relative flex w-16 min-w-16 shrink-0 items-center justify-center font-bold sm:w-24 sm:min-w-24",
+          "group relative flex w-12 min-w-12 shrink-0 items-center justify-center font-bold sm:w-24 sm:min-w-24",
           isExporting && "w-24 min-w-24"
         )}
         style={{ backgroundColor: row.color }}

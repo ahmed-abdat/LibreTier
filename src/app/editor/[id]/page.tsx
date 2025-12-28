@@ -120,7 +120,7 @@ export default function EditorPage() {
           </div>
         </div>
       </header>
-      <main className="container mx-auto max-w-5xl p-4 pb-24 md:pb-4">
+      <main className="container mx-auto max-w-5xl px-2 py-4 pb-24 sm:px-4 md:pb-4">
         <TierListEditor />
       </main>
     </div>
