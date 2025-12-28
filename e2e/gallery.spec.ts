@@ -30,9 +30,11 @@ test.describe("Gallery Management", () => {
     await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
 
-    // Edit title
-    const titleInput = page.getByPlaceholder("Tier List Title");
-    await titleInput.fill("Test Tier List");
+    // Edit title (contentEditable heading)
+    const titleHeading = page.getByRole("heading", { level: 1 });
+    await titleHeading.click({ clickCount: 3 });
+    await page.keyboard.type("Test Tier List");
+    await page.keyboard.press("Tab");
 
     // Go back to gallery
     await page.goto("/tiers");
@@ -59,7 +61,11 @@ test.describe("Gallery Management", () => {
     }
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
 
-    await page.getByPlaceholder("Tier List Title").fill("Alpha List");
+    // Edit title (contentEditable heading)
+    const titleHeading = page.getByRole("heading", { level: 1 });
+    await titleHeading.click({ clickCount: 3 });
+    await page.keyboard.type("Alpha List");
+    await page.keyboard.press("Tab");
     await page.goto("/tiers");
     await page.waitForTimeout(500);
 
@@ -67,7 +73,11 @@ test.describe("Gallery Management", () => {
     await page.getByRole("button", { name: /create new/i }).click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
 
-    await page.getByPlaceholder("Tier List Title").fill("Beta List");
+    // Edit title (contentEditable heading)
+    const titleHeading2 = page.getByRole("heading", { level: 1 });
+    await titleHeading2.click({ clickCount: 3 });
+    await page.keyboard.type("Beta List");
+    await page.keyboard.press("Tab");
     await page.goto("/tiers");
     await page.waitForTimeout(500);
 
@@ -119,7 +129,11 @@ test.describe("Tier List Actions", () => {
     await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
 
-    await page.getByPlaceholder("Tier List Title").fill("Original List");
+    // Edit title (contentEditable heading)
+    const titleHeading = page.getByRole("heading", { level: 1 });
+    await titleHeading.click({ clickCount: 3 });
+    await page.keyboard.type("Original List");
+    await page.keyboard.press("Tab");
     await page.goto("/tiers");
     await page.waitForTimeout(1000);
   });
@@ -196,8 +210,8 @@ test.describe("Tier List Actions", () => {
     // Should navigate to editor
     await expect(page).toHaveURL(/\/editor\/[a-f0-9-]+/);
 
-    // Title should be preserved
-    await expect(page.getByPlaceholder("Tier List Title")).toHaveValue(
+    // Title should be preserved (contentEditable heading)
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Original List"
     );
   });

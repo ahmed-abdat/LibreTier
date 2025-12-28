@@ -17,15 +17,19 @@ test.describe("Editor Interactions", () => {
   });
 
   test("can edit tier list title", async ({ page }) => {
-    // Find the title input
-    const titleInput = page.getByPlaceholder("Tier List Title");
-    await expect(titleInput).toBeVisible();
+    // Find the contentEditable title heading
+    const titleHeading = page.getByRole("heading", { level: 1 });
+    await expect(titleHeading).toBeVisible();
 
-    // Clear and type new title
-    await titleInput.fill("My Custom Tier List");
+    // Triple-click to select all text, then type new title
+    await titleHeading.click({ clickCount: 3 });
+    await page.keyboard.type("My Custom Tier List");
 
-    // Verify the value changed
-    await expect(titleInput).toHaveValue("My Custom Tier List");
+    // Blur to trigger save
+    await page.keyboard.press("Tab");
+
+    // Verify the title changed
+    await expect(titleHeading).toHaveText("My Custom Tier List");
   });
 
   test("displays default tiers (S, A, B, C, D, F)", async ({ page }) => {
@@ -47,10 +51,17 @@ test.describe("Editor Interactions", () => {
   });
 
   test("shows reset confirmation dialog", async ({ page }) => {
-    // Click reset button (icon button with RotateCcw icon, next to export button)
-    const resetBtn = page.locator("button:has(svg.lucide-rotate-ccw)");
-    await expect(resetBtn).toBeVisible();
-    await resetBtn.click();
+    // Click "More options" dropdown button first
+    const moreOptionsBtn = page.getByRole("button", { name: /more options/i });
+    await expect(moreOptionsBtn).toBeVisible();
+    await moreOptionsBtn.click();
+
+    // Click "Reset All Items" menu item
+    const resetMenuItem = page.getByRole("menuitem", {
+      name: /reset all items/i,
+    });
+    await expect(resetMenuItem).toBeVisible();
+    await resetMenuItem.click();
 
     // Dialog should appear
     await expect(page.getByText("Reset Tier List?")).toBeVisible();
@@ -75,9 +86,10 @@ test.describe("Editor Interactions", () => {
   });
 
   test("displays help text at bottom", async ({ page }) => {
-    // Check help text is visible
-    await expect(page.getByText(/drag.*items to rank/i)).toBeVisible();
-    await expect(page.getByText(/tap.*tier labels/i)).toBeVisible();
+    // Check help text is visible (keyboard shortcuts)
+    // Use more specific text to avoid matching hidden DND announcement elements
+    await expect(page.getByText("items to rank")).toBeVisible();
+    await expect(page.getByText(/ctrl\+z/i)).toBeVisible();
   });
 
   test("shows item count", async ({ page }) => {
