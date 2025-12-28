@@ -296,7 +296,7 @@ export function TierListEditor() {
   return (
     <div className="space-y-6">
       {/* Header - Sticky on desktop */}
-      <div className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky top-12 z-40 -mx-4 hidden flex-col gap-2 border-b px-4 py-4 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:top-14 md:flex">
+      <div className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky top-12 z-40 -mx-4 flex flex-col gap-2 border-b px-4 py-3 backdrop-blur-sm sm:py-4 md:top-14 md:flex-row md:items-center md:justify-between md:gap-4">
         <div className="min-w-0 flex-1">
           <div className="group relative inline-flex max-w-full items-center gap-2">
             <h1
@@ -330,7 +330,7 @@ export function TierListEditor() {
             </div>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <div className="hidden shrink-0 items-center gap-1.5 md:flex md:gap-2">
           {/* History group with subtle bg */}
           {settings.enableUndoRedo && (
             <div className="bg-muted/40 flex items-center rounded-lg p-0.5">
