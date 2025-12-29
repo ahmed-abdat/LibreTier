@@ -25,12 +25,12 @@ This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participatin
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/libretier.git
-   cd libretier
+   git clone https://github.com/YOUR_USERNAME/LibreTier.git
+   cd LibreTier
    ```
 3. Add the upstream repository:
    ```bash
-   git remote add upstream https://github.com/ahmed-abdat/libretier.git
+   git remote add upstream https://github.com/ahmed-abdat/LibreTier.git
    ```
 4. Create a new branch for your work:
    ```bash
@@ -292,9 +292,15 @@ Before submitting a PR, manually test:
 - [ ] Test on mobile viewport
 - [ ] Test in both light and dark themes
 
-### Automated Testing (Coming Soon)
+### Automated Testing
 
-We're setting up Vitest + React Testing Library. See the [testing plan](/.claude/plans/open-source-readiness.md) for details.
+We use Vitest + React Testing Library for unit tests and Playwright for E2E tests.
+
+```bash
+pnpm test        # Run unit tests in watch mode
+pnpm test:run    # Run unit tests once
+pnpm test:e2e    # Run E2E tests with Playwright
+```
 
 ## Reporting Bugs
 

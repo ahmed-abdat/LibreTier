@@ -7,20 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+_No unreleased changes._
 
-- Open-source documentation (CONTRIBUTING.md, CODE_OF_CONDUCT.md, CHANGELOG.md)
-- Improved package.json metadata
-
-### Changed
-
-- Removed unused dependencies for smaller bundle size
-
-### Fixed
-
-- N/A
-
-## [1.0.0] - 2024-12-18
+## [1.0.0] - 2025-12-29
 
 ### Added
 
@@ -88,8 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Technical
 
-- Next.js 15 with App Router and Turbopack
-- React 19 with latest features
+- Next.js 16 with App Router and Turbopack
+- React 19.2 with latest features
 - TypeScript in strict mode
 - Zustand for state management with persist middleware
 - Tailwind CSS with shadcn/ui components
@@ -110,7 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Description            |
 | ------- | ---------- | ---------------------- |
-| 1.0.0   | 2024-12-18 | Initial public release |
+| 1.0.0   | 2025-12-29 | Initial public release |
 
-[Unreleased]: https://github.com/ahmed-abdat/libretier/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/ahmed-abdat/libretier/releases/tag/v1.0.0
+[Unreleased]: https://github.com/ahmed-abdat/LibreTier/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/ahmed-abdat/LibreTier/releases/tag/v1.0.0

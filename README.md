@@ -8,9 +8,9 @@
 
 A free, open-source tier list maker. Create beautiful rankings with drag-and-drop, export as images, and share with friends. No account required - everything runs in your browser.
 
-[Live Demo](https://libretier.vercel.app) · [Report Bug](https://github.com/ahmed-abdat/libretier/issues) · [Request Feature](https://github.com/ahmed-abdat/libretier/issues)
+[Live Demo](https://libretier.vercel.app) · [Report Bug](https://github.com/ahmed-abdat/LibreTier/issues) · [Request Feature](https://github.com/ahmed-abdat/LibreTier/issues)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ahmed-abdat/libretier)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ahmed-abdat/LibreTier)
 
 <!-- Add your demo GIF here -->
 <!-- ![Demo](./assets/demo.gif) -->
@@ -88,8 +88,8 @@ A free, open-source tier list maker. Create beautiful rankings with drag-and-dro
 
 ```bash
 # Clone the repository
-git clone https://github.com/ahmed-abdat/libretier.git
-cd libretier
+git clone https://github.com/ahmed-abdat/LibreTier.git
+cd LibreTier
 
 # Install dependencies
 pnpm install
