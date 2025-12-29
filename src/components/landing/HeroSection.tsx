@@ -177,7 +177,7 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 + i * 0.05 }}
             whileHover={{ y: -2 }}
-            className="bg-card/50 dark:bg-card/30 hover:bg-card/80 dark:hover:bg-card/50 flex cursor-default flex-col items-center gap-1.5 rounded-xl border border-border/50 p-3 shadow-sm transition-all hover:shadow-md sm:gap-2 sm:p-4"
+            className="bg-card/50 dark:bg-card/30 hover:bg-card/80 dark:hover:bg-card/50 border-border/50 flex cursor-default flex-col items-center gap-1.5 rounded-xl border p-3 shadow-sm transition-all hover:shadow-md sm:gap-2 sm:p-4"
           >
             <div className="bg-primary/10 dark:bg-primary/20 flex h-9 w-9 items-center justify-center rounded-lg sm:h-10 sm:w-10">
               <feature.icon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />

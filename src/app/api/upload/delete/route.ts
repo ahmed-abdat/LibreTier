@@ -18,7 +18,11 @@ export async function POST(request: Request) {
 
     if (!Array.isArray(deleteUrls) || deleteUrls.length === 0) {
       return NextResponse.json(
-        { success: false, deletedCount: 0, errors: ["No delete URLs provided"] },
+        {
+          success: false,
+          deletedCount: 0,
+          errors: ["No delete URLs provided"],
+        },
         { status: 400 }
       );
     }
@@ -53,7 +57,9 @@ export async function POST(request: Request) {
           // 404 means already deleted, which is fine
           deletedCount++;
         } else {
-          errors.push(`Failed to delete: ${deleteUrl} (status: ${response.status})`);
+          errors.push(
+            `Failed to delete: ${deleteUrl} (status: ${response.status})`
+          );
         }
       } catch (error) {
         errors.push(
@@ -78,7 +84,9 @@ export async function POST(request: Request) {
       {
         success: false,
         deletedCount: 0,
-        errors: [error instanceof Error ? error.message : "Internal server error"],
+        errors: [
+          error instanceof Error ? error.message : "Internal server error",
+        ],
       },
       { status: 500 }
     );

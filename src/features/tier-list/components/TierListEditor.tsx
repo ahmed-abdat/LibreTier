@@ -322,7 +322,7 @@ export function TierListEditor() {
                 onFocus={handleTitleFocus}
                 onKeyDown={handleTitleKeyDown}
                 onPaste={handleTitlePaste}
-                className="hover:border-muted-foreground/30 focus:border-primary/50 focus:bg-muted/20 max-w-full cursor-text break-words rounded-md border-2 border-transparent px-2 py-1 text-xl font-bold outline-hidden transition-all hover:border-dashed focus:border-solid sm:text-2xl md:max-w-[600px] md:text-3xl"
+                className="hover:border-muted-foreground/30 focus:border-primary/50 focus:bg-muted/20 max-w-full cursor-text rounded-md border-2 border-transparent px-2 py-1 text-xl font-bold break-words outline-hidden transition-all hover:border-dashed focus:border-solid sm:text-2xl md:max-w-[600px] md:text-3xl"
               >
                 {currentList.title}
               </h1>

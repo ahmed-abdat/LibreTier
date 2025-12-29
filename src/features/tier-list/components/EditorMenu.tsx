@@ -206,7 +206,7 @@ export function EditorMenu({
 
       <Button
         variant="ghost"
-        className="h-12 justify-start text-base text-destructive hover:text-destructive"
+        className="text-destructive hover:text-destructive h-12 justify-start text-base"
         onClick={() => setShowResetDialog(true)}
         disabled={!hasContent}
       >

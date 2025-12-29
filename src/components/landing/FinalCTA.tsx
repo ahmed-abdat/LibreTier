@@ -62,7 +62,7 @@ export function FinalCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="mb-4 inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 sm:mb-6 sm:px-4 sm:py-1.5"
+          className="border-primary/20 bg-primary/5 mb-4 inline-flex items-center rounded-full border px-3 py-1 sm:mb-6 sm:px-4 sm:py-1.5"
         >
           <span className="text-primary text-xs font-medium sm:text-sm">
             100% Free & Open Source

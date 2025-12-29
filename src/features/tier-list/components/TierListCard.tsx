@@ -236,7 +236,7 @@ export const TierListCard = memo(function TierListCard({
               <div className="grid gap-1.5 leading-none">
                 <Label
                   htmlFor={`cleanup-${tierList.id}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   Delete hosted images
                 </Label>

@@ -68,7 +68,9 @@ export function TextItemInput({ className }: TextItemInputProps) {
       };
 
   return (
-    <div className={`flex min-h-10 w-full items-center justify-center ${className}`}>
+    <div
+      className={`flex min-h-10 w-full items-center justify-center ${className}`}
+    >
       <AnimatePresence mode="wait">
         {!isExpanded ? (
           <motion.div key="button" {...animationProps}>

@@ -1,161 +1,184 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0a0a0a">
-  <title>Offline - LibreTier</title>
-  <style>
-    :root {
-      --bg: #fafafa;
-      --fg: #18181b;
-      --muted: #71717a;
-      --card: #ffffff;
-      --border: #e4e4e7;
-      --brand: #2f8cca;
-      --tier-s: #FF7F7F;
-      --tier-a: #FFBF7F;
-      --tier-b: #FFFF7F;
-      --tier-c: #7FFF7F;
-    }
-    @media (prefers-color-scheme: dark) {
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <title>Offline - LibreTier</title>
+    <style>
       :root {
-        --bg: #09090b;
-        --fg: #fafafa;
-        --muted: #a1a1aa;
-        --card: #18181b;
-        --border: #27272a;
-        --brand: #3293ce;
+        --bg: #fafafa;
+        --fg: #18181b;
+        --muted: #71717a;
+        --card: #ffffff;
+        --border: #e4e4e7;
+        --brand: #2f8cca;
+        --tier-s: #ff7f7f;
+        --tier-a: #ffbf7f;
+        --tier-b: #ffff7f;
+        --tier-c: #7fff7f;
       }
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      min-height: 100vh;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-    .container {
-      max-width: 22rem;
-      text-align: center;
-    }
-    .tier-stack {
-      position: relative;
-      width: 180px;
-      height: 100px;
-      margin: 0 auto 2rem;
-    }
-    .tier-card {
-      position: absolute;
-      width: 140px;
-      height: 70px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    .tier-card:nth-child(1) {
-      background: var(--tier-b);
-      transform: rotate(-8deg) translateY(10px);
-      left: 0;
-    }
-    .tier-card:nth-child(2) {
-      background: var(--tier-c);
-      transform: rotate(5deg) translateY(-5px);
-      right: 0;
-    }
-    .tier-card:nth-child(3) {
-      background: var(--tier-s);
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1;
-    }
-    .wifi-icon {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      background: var(--card);
-      border-radius: 50%;
-      padding: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-    }
-    .wifi-icon svg {
-      width: 24px;
-      height: 24px;
-      color: var(--muted);
-    }
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    p {
-      color: var(--muted);
-      font-size: 0.95rem;
-      margin-bottom: 1.5rem;
-      line-height: 1.5;
-    }
-    .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75rem 1.25rem;
-      border-radius: 0.5rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .btn:hover { opacity: 0.9; }
-    .btn:active { transform: scale(0.98); }
-    .btn-primary {
-      background: var(--brand);
-      color: #fff;
-    }
-    .btn-secondary {
-      background: var(--card);
-      color: var(--fg);
-      border: 1px solid var(--border);
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="tier-stack">
-      <div class="tier-card"></div>
-      <div class="tier-card"></div>
-      <div class="tier-card"></div>
-      <div class="wifi-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-          <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-          <line x1="12" y1="20" x2="12.01" y2="20"/>
-          <line x1="2" y1="2" x2="22" y2="22"/>
-        </svg>
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #09090b;
+          --fg: #fafafa;
+          --muted: #a1a1aa;
+          --card: #18181b;
+          --border: #27272a;
+          --brand: #3293ce;
+        }
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      .container {
+        max-width: 22rem;
+        text-align: center;
+      }
+      .tier-stack {
+        position: relative;
+        width: 180px;
+        height: 100px;
+        margin: 0 auto 2rem;
+      }
+      .tier-card {
+        position: absolute;
+        width: 140px;
+        height: 70px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+      .tier-card:nth-child(1) {
+        background: var(--tier-b);
+        transform: rotate(-8deg) translateY(10px);
+        left: 0;
+      }
+      .tier-card:nth-child(2) {
+        background: var(--tier-c);
+        transform: rotate(5deg) translateY(-5px);
+        right: 0;
+      }
+      .tier-card:nth-child(3) {
+        background: var(--tier-s);
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1;
+      }
+      .wifi-icon {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        background: var(--card);
+        border-radius: 50%;
+        padding: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      }
+      .wifi-icon svg {
+        width: 24px;
+        height: 24px;
+        color: var(--muted);
+      }
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+      }
+      .buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition:
+          opacity 0.15s,
+          transform 0.1s;
+      }
+      .btn:hover {
+        opacity: 0.9;
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      .btn-primary {
+        background: var(--brand);
+        color: #fff;
+      }
+      .btn-secondary {
+        background: var(--card);
+        color: var(--fg);
+        border: 1px solid var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="tier-stack">
+        <div class="tier-card"></div>
+        <div class="tier-card"></div>
+        <div class="tier-card"></div>
+        <div class="wifi-icon">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+            <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+            <line x1="12" y1="20" x2="12.01" y2="20" />
+            <line x1="2" y1="2" x2="22" y2="22" />
+          </svg>
+        </div>
+      </div>
+
+      <h1>You're Offline</h1>
+      <p>
+        Your tier lists are saved locally and still accessible. Reconnect to
+        share or upload images.
+      </p>
+
+      <div class="buttons">
+        <a href="/tiers" class="btn btn-primary">Go to My Tier Lists</a>
+        <button onclick="location.reload()" class="btn btn-secondary">
+          Try Again
+        </button>
       </div>
     </div>
-
-    <h1>You're Offline</h1>
-    <p>Your tier lists are saved locally and still accessible. Reconnect to share or upload images.</p>
-
-    <div class="buttons">
-      <a href="/tiers" class="btn btn-primary">Go to My Tier Lists</a>
-      <button onclick="location.reload()" class="btn btn-secondary">Try Again</button>
-    </div>
-  </div>
-</body>
+  </body>
 </html>
