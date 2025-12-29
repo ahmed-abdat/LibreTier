@@ -5,9 +5,7 @@ test.describe("Navigation", () => {
     await page.goto("/");
 
     // Check main elements
-    await expect(page.locator("h1")).toContainText(
-      "Create Beautiful Tier Lists"
-    );
+    await expect(page.locator("h1")).toContainText("Free Tier List Maker");
     await expect(
       page.getByRole("link", { name: /get started/i })
     ).toBeVisible();
@@ -38,9 +36,9 @@ test.describe("Navigation", () => {
   test("logo navigates to home", async ({ page }) => {
     await page.goto("/tiers");
 
-    // Click logo/brand
+    // Click logo/brand (LibreTier text in header)
     await page
-      .getByRole("link", { name: /tier list/i })
+      .getByRole("link", { name: /libretier/i })
       .first()
       .click();
 

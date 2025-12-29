@@ -86,9 +86,9 @@ test.describe("Keyboard Navigation", () => {
   });
 
   test("Reset button opens dialog with keyboard", async ({ page }) => {
-    // Click "More options" dropdown first
-    const moreOptionsBtn = page.getByRole("button", { name: /more options/i });
-    await moreOptionsBtn.focus();
+    // Click menu dropdown first
+    const menuBtn = page.getByRole("button", { name: /^menu$/i });
+    await menuBtn.focus();
     await page.keyboard.press("Enter");
 
     // Navigate to Reset menu item and select it
@@ -107,9 +107,9 @@ test.describe("Keyboard Navigation", () => {
   });
 
   test("dialog buttons respond to keyboard", async ({ page }) => {
-    // Click "More options" dropdown first
-    const moreOptionsBtn = page.getByRole("button", { name: /more options/i });
-    await moreOptionsBtn.click();
+    // Click menu dropdown first
+    const menuBtn = page.getByRole("button", { name: /^menu$/i });
+    await menuBtn.click();
 
     // Click Reset menu item
     await page.getByRole("menuitem", { name: /reset all items/i }).click();

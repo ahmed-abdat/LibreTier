@@ -51,10 +51,10 @@ test.describe("Editor Interactions", () => {
   });
 
   test("shows reset confirmation dialog", async ({ page }) => {
-    // Click "More options" dropdown button first
-    const moreOptionsBtn = page.getByRole("button", { name: /more options/i });
-    await expect(moreOptionsBtn).toBeVisible();
-    await moreOptionsBtn.click();
+    // Click menu dropdown button first
+    const menuBtn = page.getByRole("button", { name: /^menu$/i });
+    await expect(menuBtn).toBeVisible();
+    await menuBtn.click();
 
     // Click "Reset All Items" menu item
     const resetMenuItem = page.getByRole("menuitem", {
