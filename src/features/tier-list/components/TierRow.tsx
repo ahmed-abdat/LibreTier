@@ -220,7 +220,7 @@ export const TierRow = memo(function TierRow({
             onKeyDown={handleKeyDown}
             rows={1}
             aria-multiline="true"
-            className="w-full resize-none overflow-hidden border-none bg-transparent p-1 text-center font-bold wrap-break-word outline-none"
+            className="w-full resize-none overflow-hidden border-0 bg-transparent p-1 text-center font-bold wrap-break-word outline-none ring-0 shadow-none focus:border-0 focus:outline-none focus:ring-0 focus:shadow-none"
             style={{
               color: textColor,
               fontSize: "14px",
