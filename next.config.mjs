@@ -11,7 +11,7 @@ const withSerwist = withSerwistInit({
     { url: "/", revision: "3" },
     { url: "/tiers", revision: "3" },
     { url: "/share", revision: "3" },
-    { url: "/~offline", revision: "3" },
+    { url: "/offline", revision: "4" },
   ],
   // Disable in development since Serwist doesn't support Turbopack yet
   disable: process.env.NODE_ENV !== "production",

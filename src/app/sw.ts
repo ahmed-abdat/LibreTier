@@ -4,6 +4,7 @@ import {
   Serwist,
   StaleWhileRevalidate,
   CacheFirst,
+  NetworkFirst,
   ExpirationPlugin,
   CacheableResponsePlugin,
 } from "serwist";
@@ -16,103 +17,29 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
-const OFFLINE_CACHE = "offline-fallback-v1";
 const OFFLINE_URL = "/offline.html";
 
-// Cache offline page during install - this is critical for fallback to work
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    (async () => {
-      const cache = await caches.open(OFFLINE_CACHE);
-      await cache.add(new Request(OFFLINE_URL, { cache: "reload" }));
-    })()
-  );
-  // Force activation without waiting
-  void self.skipWaiting();
-});
-
-// Claim clients immediately on activation
-self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-});
-
-const NAVIGATION_CACHE = "navigation-cache-v1";
-
-// CRITICAL: Manual fetch handler for navigation - must be BEFORE serwist.addEventListeners()
-// Offline-first: serve from cache, update in background
-self.addEventListener("fetch", (event) => {
-  // Only handle navigation requests (HTML pages)
-  if (event.request.mode === "navigate") {
-    event.respondWith(
-      (async () => {
-        const navCache = await caches.open(NAVIGATION_CACHE);
-
-        // Check navigation cache first (dynamically cached pages)
-        let cachedResponse = await navCache.match(event.request);
-
-        // If not in nav cache, check all caches (including Serwist's precache)
-        cachedResponse ??= await caches.match(event.request);
-
-        // Fetch from network in background
-        const networkPromise = fetch(event.request)
-          .then(async (networkResponse) => {
-            if (networkResponse.ok) {
-              await navCache.put(event.request, networkResponse.clone());
-            }
-            return networkResponse;
-          })
-          .catch(() => null);
-
-        // If we have a cached response, return it immediately
-        if (cachedResponse) {
-          void networkPromise;
-          return cachedResponse;
-        }
-
-        // No cache - wait for network with timeout
-        try {
-          const networkResponse = await Promise.race([
-            networkPromise,
-            new Promise<null>((resolve) =>
-              setTimeout(() => resolve(null), 5000)
-            ),
-          ]);
-
-          if (networkResponse) {
-            return networkResponse;
-          }
-        } catch {
-          // Network failed
-        }
-
-        // Network failed - serve offline page
-        const offlineCache = await caches.open(OFFLINE_CACHE);
-        const offlineResponse = await offlineCache.match(OFFLINE_URL);
-        if (offlineResponse) {
-          return offlineResponse;
-        }
-
-        // Last resort
-        return new Response(
-          "<!DOCTYPE html><html><head><title>Offline</title></head><body><h1>You are offline</h1><p>Please check your connection.</p></body></html>",
-          {
-            status: 503,
-            headers: { "Content-Type": "text/html" },
-          }
-        );
-      })()
-    );
-    return;
-  }
-});
-
-// Serwist configuration for non-navigation requests (assets, API, etc.)
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: false,
   runtimeCaching: [
+    // Handle navigation requests with NetworkFirst + offline fallback
+    {
+      matcher: ({ request }) => request.mode === "navigate",
+      handler: new NetworkFirst({
+        cacheName: "pages-navigation",
+        networkTimeoutSeconds: 5,
+        plugins: [
+          new CacheableResponsePlugin({ statuses: [0, 200] }),
+          new ExpirationPlugin({
+            maxEntries: 50,
+            maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+          }),
+        ],
+      }),
+    },
     // Handle RSC prefetch requests - StaleWhileRevalidate for instant response
     {
       matcher: ({ request, sameOrigin }) =>
@@ -180,6 +107,15 @@ const serwist = new Serwist({
     },
     ...defaultCache,
   ],
+});
+
+// Fallback for failed requests - serve offline page for documents
+serwist.setCatchHandler(async ({ request }) => {
+  if (request.destination === "document") {
+    const match = await serwist.matchPrecache(OFFLINE_URL);
+    return match ?? Response.error();
+  }
+  return Response.error();
 });
 
 serwist.addEventListeners();
