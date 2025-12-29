@@ -80,3 +80,6 @@ Thumbs.db
 
 # npm cache
 .npm/
+
+# Launch guide (personal)
+LAUNCH.md
