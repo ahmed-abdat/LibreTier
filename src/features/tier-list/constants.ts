@@ -47,5 +47,4 @@ export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 // Maximum items allowed per tier
 export const MAX_ITEMS_PER_TIER = 50;
 
-// Maximum title length
-export const MAX_TITLE_LENGTH = 100;
+// Note: String length limits (title, description, etc.) are in @/lib/constants

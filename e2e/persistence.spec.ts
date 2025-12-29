@@ -8,9 +8,10 @@ test.describe("LocalStorage Persistence", () => {
 
     // Create a tier list
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     const getStartedBtn = page.getByRole("button", { name: /get started/i });
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
     await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
 
@@ -20,12 +21,12 @@ test.describe("LocalStorage Persistence", () => {
     await page.keyboard.type("Persistent List");
     await page.keyboard.press("Tab");
 
-    // Wait for save (debounce)
-    await page.waitForTimeout(500);
+    // Wait for the heading to show the new title (confirms save)
+    await expect(titleHeading).toHaveText("Persistent List");
 
     // Reload the page
     await page.reload();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Title should still be there
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
@@ -40,9 +41,10 @@ test.describe("LocalStorage Persistence", () => {
 
     // Create a tier list
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     const getStartedBtn = page.getByRole("button", { name: /get started/i });
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
     await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
 
@@ -51,18 +53,20 @@ test.describe("LocalStorage Persistence", () => {
     await titleHeading.click({ clickCount: 3 });
     await page.keyboard.type("Gallery Test");
     await page.keyboard.press("Tab");
-    await page.waitForTimeout(500);
+
+    // Wait for the heading to show the new title (confirms save)
+    await expect(titleHeading).toHaveText("Gallery Test");
 
     // Go to gallery
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Verify it's there
     await expect(page.getByText("Gallery Test")).toBeVisible();
 
     // Reload
     await page.reload();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Still there after reload
     await expect(page.getByText("Gallery Test")).toBeVisible();
@@ -75,9 +79,10 @@ test.describe("LocalStorage Persistence", () => {
 
     // Create first tier list
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     let getStartedBtn = page.getByRole("button", { name: /get started/i });
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
     await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
     // Edit title
@@ -85,32 +90,35 @@ test.describe("LocalStorage Persistence", () => {
     await titleHeading.click({ clickCount: 3 });
     await page.keyboard.type("First List");
     await page.keyboard.press("Tab");
+    await expect(titleHeading).toHaveText("First List");
 
     // Create second tier list
     await page.goto("/tiers");
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("domcontentloaded");
     await page.getByRole("button", { name: /create new/i }).click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
     titleHeading = page.getByRole("heading", { level: 1 });
     await titleHeading.click({ clickCount: 3 });
     await page.keyboard.type("Second List");
     await page.keyboard.press("Tab");
+    await expect(titleHeading).toHaveText("Second List");
 
     // Create third tier list
     await page.goto("/tiers");
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("domcontentloaded");
     await page.getByRole("button", { name: /create new/i }).click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
     titleHeading = page.getByRole("heading", { level: 1 });
     await titleHeading.click({ clickCount: 3 });
     await page.keyboard.type("Third List");
     await page.keyboard.press("Tab");
+    await expect(titleHeading).toHaveText("Third List");
 
     // Go to gallery and reload
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
     await page.reload();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // All three should be visible
     await expect(page.getByText("First List")).toBeVisible();
@@ -126,9 +134,10 @@ test.describe("LocalStorage Persistence", () => {
 
     // Create a tier list
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     const getStartedBtn = page.getByRole("button", { name: /get started/i });
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
     await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
     // Edit title
@@ -136,10 +145,11 @@ test.describe("LocalStorage Persistence", () => {
     await titleHeading.click({ clickCount: 3 });
     await page.keyboard.type("To Delete");
     await page.keyboard.press("Tab");
+    await expect(titleHeading).toHaveText("To Delete");
 
     // Go to gallery
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Delete it
     const card = page.getByText("To Delete");
@@ -156,9 +166,12 @@ test.describe("LocalStorage Persistence", () => {
       .last()
       .click();
 
+    // Wait for delete confirmation
+    await expect(page.getByText(/deleted/i)).toBeVisible();
+
     // Reload
     await page.reload();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Should not be there
     await expect(page.getByText("To Delete")).not.toBeVisible();

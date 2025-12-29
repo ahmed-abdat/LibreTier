@@ -8,6 +8,11 @@ import { toast } from "sonner";
 import { type TierLevel, TIER_COLORS, TIER_LEVELS } from "../constants";
 import { type TierItem, type TierRow, type TierList } from "../index";
 import { logger } from "@/lib/logger";
+import {
+  isValidHexColor,
+  MAX_TITLE_LENGTH,
+  MAX_TIER_NAME_LENGTH,
+} from "@/lib/constants";
 
 const log = logger.child("TierStore");
 
@@ -175,7 +180,10 @@ export const useTierStore = create<TierStore>()(
               // Only reject if entirely whitespace
               if (!updates.title.trim()) return state;
               // Allow spaces while typing, just limit length
-              updates = { ...updates, title: updates.title.slice(0, 200) };
+              updates = {
+                ...updates,
+                title: updates.title.slice(0, MAX_TITLE_LENGTH),
+              };
             }
 
             return {
@@ -222,15 +230,14 @@ export const useTierStore = create<TierStore>()(
             if (!trimmedName) return state;
 
             // Validate color (must be valid hex)
-            const hexRegex = /^#[0-9A-Fa-f]{6}$/;
-            if (!hexRegex.test(color)) return state;
+            if (!isValidHexColor(color)) return state;
 
             const newTier: TierRow = {
               id: uuidv4(),
               level: "C" as TierLevel, // Default level
               color,
               items: [],
-              name: trimmedName.slice(0, 10),
+              name: trimmedName.slice(0, MAX_TIER_NAME_LENGTH),
             };
 
             return {
@@ -254,13 +261,15 @@ export const useTierStore = create<TierStore>()(
             if (updates.name !== undefined) {
               const trimmedName = updates.name.trim();
               if (!trimmedName) return state; // Reject empty names
-              updates = { ...updates, name: trimmedName.slice(0, 100) };
+              updates = {
+                ...updates,
+                name: trimmedName.slice(0, MAX_TIER_NAME_LENGTH),
+              };
             }
 
             // Validate color if provided (must be valid hex)
             if (updates.color !== undefined) {
-              const hexRegex = /^#[0-9A-Fa-f]{6}$/;
-              if (!hexRegex.test(updates.color)) return state;
+              if (!isValidHexColor(updates.color)) return state;
             }
 
             return {

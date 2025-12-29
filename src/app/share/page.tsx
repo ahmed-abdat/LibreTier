@@ -3,11 +3,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Copy, Check, Plus, Home, AlertCircle } from "lucide-react";
+import { Copy, Check, Plus, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { PageLoadingSpinner } from "@/components/ui/loading-spinner";
+import { NotFoundPage } from "@/components/ui/not-found-card";
 import { parseShareUrl } from "@/features/tier-list/utils/url-share";
 import { useTierStore } from "@/features/tier-list/store";
 import { getContrastColor } from "@/lib/utils";
@@ -165,60 +167,28 @@ export default function SharePage() {
 
   // Loading state
   if (!mounted) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
-          <p className="text-muted-foreground">Loading shared tier list...</p>
-        </div>
-      </div>
-    );
+    return <PageLoadingSpinner label="Loading shared tier list..." />;
   }
 
   // Error state
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col">
-        <header className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-sm">
-          <div className="container mx-auto flex h-12 max-w-6xl items-center justify-between px-4 md:h-14">
-            <Link href="/" className="flex items-center gap-2">
-              <Logo size={40} />
-              <h1 className="text-xl font-bold">LibreTier</h1>
-            </Link>
-            <ThemeToggle />
+      <NotFoundPage
+        icon={
+          <div className="bg-destructive/10 flex h-16 w-16 items-center justify-center rounded-full">
+            <AlertCircle className="text-destructive h-8 w-8" />
           </div>
-        </header>
-        <main className="flex flex-1 items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-4 text-center"
-          >
-            <div className="bg-destructive/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
-              <AlertCircle className="text-destructive h-8 w-8" />
-            </div>
-            <h2 className="text-2xl font-bold">Invalid Share Link</h2>
-            <p className="text-muted-foreground max-w-md">{error}</p>
-            <Button onClick={() => router.push("/")} className="mt-4">
-              <Home className="mr-2 h-4 w-4" />
-              Go to Home
-            </Button>
-          </motion.div>
-        </main>
-      </div>
+        }
+        title="Invalid Share Link"
+        description={error}
+        onAction={() => router.push("/")}
+      />
     );
   }
 
   // No data state
   if (!sharedList) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+    return <PageLoadingSpinner label="Loading..." />;
   }
 
   return (

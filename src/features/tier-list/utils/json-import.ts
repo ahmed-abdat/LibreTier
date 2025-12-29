@@ -2,6 +2,15 @@ import { v4 as uuidv4 } from "uuid";
 import type { TierList, TierRow, TierItem } from "../index";
 import type { TierListExport } from "./json-export";
 import { TIER_LEVELS, type TierLevel } from "../constants";
+import {
+  HEX_COLOR_REGEX,
+  MAX_TITLE_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_ITEM_NAME_LENGTH,
+  MAX_TIER_NAME_LENGTH,
+  MAX_FILE_SIZE,
+} from "@/lib/constants";
+import { fromISO } from "@/lib/date-utils";
 
 // Validation result type
 export interface ImportValidationResult {
@@ -12,9 +21,6 @@ export interface ImportValidationResult {
 
 // Valid tier levels set for O(1) lookup
 const VALID_TIER_LEVELS = new Set<string>(TIER_LEVELS);
-
-// Hex color regex
-const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
 
 /**
  * Validates that a value is a valid tier item structure
@@ -127,27 +133,18 @@ export function validateTierListImport(json: unknown): ImportValidationResult {
 }
 
 /**
- * Safely parses a date string, returns current date if invalid
- */
-function parseDate(dateStr: unknown): Date {
-  if (!dateStr || typeof dateStr !== "string") return new Date();
-  const date = new Date(dateStr);
-  return isNaN(date.getTime()) ? new Date() : date;
-}
-
-/**
  * Transforms an imported item, generating new IDs and parsing dates
  */
 function transformItem(item: Record<string, unknown>): TierItem {
   const now = new Date();
   return {
     id: uuidv4(),
-    name: String(item.name).slice(0, 200),
+    name: String(item.name).slice(0, MAX_ITEM_NAME_LENGTH),
     imageUrl: item.imageUrl ? String(item.imageUrl) : undefined,
     description: item.description
-      ? String(item.description).slice(0, 1000)
+      ? String(item.description).slice(0, MAX_DESCRIPTION_LENGTH)
       : undefined,
-    createdAt: parseDate(item.createdAt),
+    createdAt: fromISO(item.createdAt),
     updatedAt: now,
   };
 }
@@ -161,9 +158,11 @@ function transformRow(row: Record<string, unknown>): TierRow {
     id: uuidv4(),
     level: row.level as TierLevel,
     color: String(row.color),
-    name: row.name ? String(row.name).slice(0, 100) : undefined,
+    name: row.name
+      ? String(row.name).slice(0, MAX_TIER_NAME_LENGTH)
+      : undefined,
     description: row.description
-      ? String(row.description).slice(0, 500)
+      ? String(row.description).slice(0, MAX_DESCRIPTION_LENGTH)
       : undefined,
     items: items.map(transformItem),
   };
@@ -180,8 +179,8 @@ export function transformImportToTierList(
   const tierList = data.tierList;
 
   return {
-    title: tierList.title.slice(0, 200),
-    description: tierList.description?.slice(0, 1000),
+    title: tierList.title.slice(0, MAX_TITLE_LENGTH),
+    description: tierList.description?.slice(0, MAX_DESCRIPTION_LENGTH),
     rows: (tierList.rows as unknown as Record<string, unknown>[]).map(
       transformRow
     ),
@@ -190,7 +189,7 @@ export function transformImportToTierList(
     ).map(transformItem),
     createdBy: "local-user",
     isPublic: false,
-    createdAt: parseDate(tierList.createdAt),
+    createdAt: fromISO(tierList.createdAt),
     updatedAt: now,
     tags: Array.isArray(tierList.tags)
       ? tierList.tags
@@ -211,9 +210,8 @@ export async function readJSONFile(file: File): Promise<unknown> {
       return;
     }
 
-    // Validate file size (10MB max)
-    const MAX_SIZE = 10 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
       reject(new Error("File too large. Maximum size is 10MB."));
       return;
     }

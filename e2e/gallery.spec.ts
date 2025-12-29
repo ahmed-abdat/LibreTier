@@ -9,7 +9,7 @@ test.describe("Gallery Management", () => {
 
   test("shows empty state when no tier lists", async ({ page }) => {
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Should show empty state with "Create Your First Tier List" or "Get Started"
     const emptyStateText = page.getByText(/create your first tier list/i);
@@ -24,9 +24,10 @@ test.describe("Gallery Management", () => {
   test("displays tier list card after creation", async ({ page }) => {
     // Create a tier list
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     const getStartedBtn = page.getByRole("button", { name: /get started/i });
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
     await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
 
@@ -38,7 +39,7 @@ test.describe("Gallery Management", () => {
 
     // Go back to gallery
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Should show the tier list card
     await expect(page.getByText("Test Tier List")).toBeVisible();
@@ -48,7 +49,7 @@ test.describe("Gallery Management", () => {
   test("can search tier lists", async ({ page }) => {
     // Create two tier lists with different names
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Create first list
     let getStartedBtn = page.getByRole("button", { name: /get started/i });
@@ -67,7 +68,7 @@ test.describe("Gallery Management", () => {
     await page.keyboard.type("Alpha List");
     await page.keyboard.press("Tab");
     await page.goto("/tiers");
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("domcontentloaded");
 
     // Create second list
     await page.getByRole("button", { name: /create new/i }).click();
@@ -79,7 +80,7 @@ test.describe("Gallery Management", () => {
     await page.keyboard.type("Beta List");
     await page.keyboard.press("Tab");
     await page.goto("/tiers");
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("domcontentloaded");
 
     // Both should be visible
     await expect(page.getByText("Alpha List")).toBeVisible();
@@ -101,15 +102,16 @@ test.describe("Gallery Management", () => {
   test("shows tier list count", async ({ page }) => {
     // Create a tier list first
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     const getStartedBtn = page.getByRole("button", { name: /get started/i });
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
     await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
 
     // Go back to gallery
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Should show count
     await expect(page.getByText(/you have 1 tier list/i)).toBeVisible();
@@ -122,10 +124,11 @@ test.describe("Tier List Actions", () => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Create a tier list
     const getStartedBtn = page.getByRole("button", { name: /get started/i });
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
     await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
 
@@ -135,7 +138,7 @@ test.describe("Tier List Actions", () => {
     await page.keyboard.type("Original List");
     await page.keyboard.press("Tab");
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
   });
 
   test("can duplicate tier list via menu", async ({ page }) => {

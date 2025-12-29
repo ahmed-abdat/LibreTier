@@ -22,7 +22,9 @@ import { Plus, Pencil, Undo2, Redo2, ArrowDown } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTierStore, useTemporalStore, useCurrentList } from "../store";
 import { useSettingsStore } from "../store/settings-store";
-import { TIER_DEFAULTS, MAX_TITLE_LENGTH } from "../constants";
+import { TIER_DEFAULTS } from "../constants";
+import { MAX_TITLE_LENGTH } from "@/lib/constants";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { TierRow } from "./TierRow";
 import { TierItem } from "./TierItem";
 import { ItemPool } from "./ItemPool";
@@ -300,10 +302,7 @@ export function TierListEditor() {
   if (!currentList) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+        <LoadingSpinner label="Loading..." />
       </div>
     );
   }

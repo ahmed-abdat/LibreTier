@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, SortAsc, LayoutGrid } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useTierStore, useTierLists } from "../store";
 import { EmptyState } from "./EmptyState";
 import { TierListCard } from "./TierListCard";
@@ -153,10 +154,7 @@ export function TierListGallery() {
   if (!mounted) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
-          <p className="text-muted-foreground">Loading your tier lists...</p>
-        </div>
+        <LoadingSpinner label="Loading your tier lists..." />
       </div>
     );
   }

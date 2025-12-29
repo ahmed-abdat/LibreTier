@@ -6,13 +6,14 @@ test.describe("Editor Interactions", () => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
     await page.goto("/tiers");
-    await page.waitForTimeout(1000);
+
+    // Wait for page to be ready (gallery loaded)
+    await page.waitForLoadState("domcontentloaded");
 
     // Create a new tier list
     const getStartedBtn = page.getByRole("button", { name: /get started/i });
-    if (await getStartedBtn.isVisible().catch(() => false)) {
-      await getStartedBtn.click();
-    }
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
+    await getStartedBtn.click();
     await page.waitForURL(/\/editor\/[a-f0-9-]+/);
   });
 
@@ -135,10 +136,7 @@ test.describe("Editor Interactions", () => {
       document.dispatchEvent(pasteEvent);
     }, testImageBase64);
 
-    // Wait for image to be processed and added
-    await page.waitForTimeout(1000);
-
-    // Should show success toast or item count change
+    // Wait for success toast or item to appear (no fixed timeout)
     await expect(page.getByText(/added|test-image/i).first()).toBeVisible({
       timeout: 5000,
     });

@@ -4,6 +4,7 @@ import { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, Image as ImageIcon, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useTierStore } from "../store";
 import { toast } from "sonner";
 import {
@@ -298,13 +299,7 @@ export function ImageUpload({ className }: ImageUploadProps) {
           </>
         ) : isProcessing ? (
           <div role="status" aria-live="polite">
-            <div
-              className="border-primary h-12 w-12 animate-spin rounded-full border-2 border-t-transparent"
-              aria-label="Processing images"
-            />
-            <p className="text-muted-foreground mt-3 text-sm font-medium">
-              Processing...
-            </p>
+            <LoadingSpinner size="lg" label="Processing..." />
           </div>
         ) : (
           <>

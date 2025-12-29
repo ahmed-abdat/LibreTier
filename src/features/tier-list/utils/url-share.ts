@@ -5,9 +5,11 @@ import { TIER_LEVELS } from "../constants";
 import { getItemsWithBase64Images, isBase64Image } from "./json-export";
 import { uploadImages } from "@/lib/services/imgbb";
 import { logger } from "@/lib/logger";
-
-// Maximum URL length for broad browser compatibility
-const MAX_URL_LENGTH = 8000;
+import {
+  isValidHexColor,
+  MAX_URL_LENGTH,
+  MAX_DECOMPRESSED_SIZE,
+} from "@/lib/constants";
 
 // Minimal export schema version
 const SHARE_VERSION = 1;
@@ -127,9 +129,6 @@ function compressForUrl(data: MinimalExport): string {
   const json = JSON.stringify(data);
   return LZString.compressToEncodedURIComponent(json);
 }
-
-// Maximum decompressed size to prevent memory bombs (5MB)
-const MAX_DECOMPRESSED_SIZE = 5 * 1024 * 1024;
 
 /**
  * Decompress data from URL with size limit protection
@@ -265,13 +264,6 @@ export async function createShareableUrl(
  */
 function isValidTierLevel(level: string): level is TierLevel {
   return TIER_LEVELS.includes(level as TierLevel);
-}
-
-/**
- * Validate a hex color string
- */
-function isValidHexColor(color: string): boolean {
-  return /^#[0-9A-Fa-f]{6}$/.test(color);
 }
 
 /**

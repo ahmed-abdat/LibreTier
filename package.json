@@ -108,7 +108,11 @@
     "@types/react-dom": "19.2.3"
   },
   "lint-staged": {
-    "*.{ts,tsx,json,md,css}": [
+    "*.{ts,tsx}": [
+      "eslint --cache --cache-location .next/cache/eslint/ --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
       "prettier --write"
     ]
   }
