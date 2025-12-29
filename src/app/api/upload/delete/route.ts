@@ -7,6 +7,40 @@ export interface DeleteResult {
   errors: string[];
 }
 
+// Allowlist of exact imgbb hostnames to prevent SSRF attacks
+// Only these specific domains are allowed for image deletion
+const ALLOWED_IMGBB_HOSTS = new Set([
+  "ibb.co",
+  "i.ibb.co",
+  "imgbb.com",
+  "www.imgbb.com",
+]);
+
+/**
+ * Validates that a URL is a legitimate imgbb delete URL
+ * Uses exact hostname matching to prevent SSRF attacks
+ */
+function isValidImgbbDeleteUrl(urlStr: string): boolean {
+  if (!urlStr || typeof urlStr !== "string") return false;
+
+  try {
+    const url = new URL(urlStr);
+
+    // Must be HTTPS
+    if (url.protocol !== "https:") return false;
+
+    // Must be an exact match to allowed hosts (prevents evil-ibb.co attacks)
+    if (!ALLOWED_IMGBB_HOSTS.has(url.hostname)) return false;
+
+    // Must have a valid path (imgbb delete URLs have specific patterns)
+    if (!url.pathname || url.pathname === "/") return false;
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Delete images from imgbb using their delete URLs
  * POST /api/upload/delete
@@ -28,18 +62,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Filter valid imgbb delete URLs using proper URL parsing
-    const validUrls = deleteUrls.filter((urlStr) => {
-      if (!urlStr || typeof urlStr !== "string") return false;
-      try {
-        const url = new URL(urlStr);
-        return (
-          url.hostname.endsWith("ibb.co") || url.hostname.endsWith("imgbb.com")
-        );
-      } catch {
-        return false;
-      }
-    });
+    // Filter valid imgbb delete URLs using strict validation
+    const validUrls = deleteUrls.filter(isValidImgbbDeleteUrl);
 
     if (validUrls.length === 0) {
       return NextResponse.json(
