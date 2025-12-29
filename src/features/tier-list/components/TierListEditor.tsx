@@ -12,6 +12,7 @@ import {
   useSensors,
   MeasuringStrategy,
 } from "@dnd-kit/core";
+import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { NoopKeyboardSensor } from "../utils/NoopKeyboardSensor";
 import {
   SortableContext,
@@ -444,6 +445,7 @@ export function TierListEditor() {
       <DndContext
         sensors={sensors}
         collisionDetection={collisionDetection}
+        modifiers={[restrictToWindowEdges]}
         onDragStart={(event) => {
           // Pause undo history during drag to prevent flooding
           useTierStore.temporal.getState().pause();
