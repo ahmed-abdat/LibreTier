@@ -268,18 +268,18 @@ export const TierRow = memo(function TierRow({
                 size="icon"
                 aria-label={`Settings for tier ${row.name ?? row.level}`}
                 className={cn(
-                  "absolute -top-1.5 -right-1.5 rounded-full",
-                  // Mobile: 28x28 touch target, semi-visible
-                  // Desktop (md+): smaller size (24x24), hover-reveal
-                  "h-7 w-7 md:h-6 md:w-6",
-                  "bg-black/50 hover:scale-110 hover:bg-black/70 active:scale-95",
-                  "border border-white/20 shadow-md",
-                  "opacity-70 md:opacity-0 md:group-hover/row:opacity-100",
+                  "absolute top-0.5 right-0.5 rounded-full",
+                  // Mobile: 24x24 touch target, semi-visible
+                  // Desktop (md+): smaller size (20x20), hover-reveal
+                  "h-6 w-6 md:h-5 md:w-5",
+                  "bg-black/40 hover:scale-110 hover:bg-black/60 active:scale-95",
+                  "border border-white/20 shadow-sm",
+                  "opacity-60 md:opacity-0 md:group-hover/row:opacity-100",
                   "transition-all duration-200"
                 )}
               >
                 <Settings2
-                  className="h-3.5 w-3.5 text-white md:h-3 md:w-3"
+                  className="h-3 w-3 text-white md:h-2.5 md:w-2.5"
                   aria-hidden="true"
                 />
               </Button>
