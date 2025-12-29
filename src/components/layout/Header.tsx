@@ -8,7 +8,7 @@ export function Header() {
       <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <Logo size={40} priority />
-          <h1 className="text-xl font-bold">LiberTier</h1>
+          <h1 className="text-xl font-bold">LibreTier</h1>
         </Link>
         <div className="flex items-center gap-4">
           <ThemeToggle />

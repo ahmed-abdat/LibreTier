@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "LiberTier - Free Tier List Maker",
-    short_name: "LiberTier",
+    name: "LibreTier - Free Tier List Maker",
+    short_name: "LibreTier",
     description:
       "Create beautiful tier lists with drag-and-drop. No login, no ads, no tracking. Works offline.",
     start_url: "/",

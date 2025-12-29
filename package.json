@@ -98,7 +98,6 @@
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "serwist": "^9.4.2",
-    "sharp-cli": "^5.2.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.0.3",

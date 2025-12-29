@@ -17,7 +17,7 @@ export default function Home() {
         <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
             <Logo size={40} priority />
-            <span className="text-xl font-bold">LiberTier</span>
+            <span className="text-xl font-bold">LibreTier</span>
           </Link>
           <div className="flex items-center gap-3">
             <Button variant="ghost" asChild>
@@ -46,7 +46,7 @@ export default function Home() {
       <footer className="border-t">
         <div className="container mx-auto max-w-6xl px-4 py-6">
           <p className="text-muted-foreground text-center text-sm">
-            LiberTier - Free, open source tier list maker. No account required.
+            LibreTier - Free, open source tier list maker. No account required.
           </p>
         </div>
       </footer>
