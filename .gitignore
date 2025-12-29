@@ -35,6 +35,7 @@ public/fallback-*.js
 # claude code
 CLAUDE.md
 .claude/
+.mcp.json
 
 # supabase email templates
 src/features/auth/auth-html-templates/*
