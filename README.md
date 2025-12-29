@@ -175,4 +175,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-If you find this useful, consider giving it a star.
+If you find LibreTier useful, consider giving it a ⭐ — it helps others discover the project!
