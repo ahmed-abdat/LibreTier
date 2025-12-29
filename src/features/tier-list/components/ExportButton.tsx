@@ -149,11 +149,19 @@ export function ExportButton({
               (btn as HTMLElement).style.display = "none";
             });
 
-            // Hide tier settings buttons
+            // Hide tier settings buttons (gear icons on tier labels)
             const settingsButtons = exportTarget.querySelectorAll(
-              "[role='button'][aria-label*='Settings']"
+              "button[aria-label*='Settings']"
             );
             settingsButtons.forEach((btn) => {
+              (btn as HTMLElement).style.display = "none";
+            });
+
+            // Also hide any buttons with Settings2 icon class pattern
+            const allTierButtons = exportTarget.querySelectorAll(
+              ".absolute.rounded-full"
+            );
+            allTierButtons.forEach((btn) => {
               (btn as HTMLElement).style.display = "none";
             });
 
@@ -184,10 +192,18 @@ export function ExportButton({
                   innerContainer.style.backgroundColor = isDark
                     ? "#1a1a1f"
                     : "#ffffff";
+                  // Force full opacity and remove any filters
                   img.style.opacity = "1";
+                  img.style.filter = "none";
                   img.style.objectFit = "cover";
                   img.style.width = "100%";
                   img.style.height = "100%";
+                  // Ensure image is not transparent
+                  img.style.mixBlendMode = "normal";
+                  // Add slight contrast boost for light mode
+                  if (!isDark) {
+                    img.style.filter = "contrast(1.05) saturate(1.05)";
+                  }
                 } else {
                   // Text-only item - needs better contrast
                   const textFallback = innerContainer.querySelector(
