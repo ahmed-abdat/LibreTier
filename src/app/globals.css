@@ -302,3 +302,19 @@
     }
   }
 }
+
+/* Rainbow animation for GitHub button */
+@keyframes rainbow {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 200%;
+  }
+}
+
+@layer utilities {
+  .animate-rainbow {
+    animation: rainbow 2s linear infinite;
+  }
+}

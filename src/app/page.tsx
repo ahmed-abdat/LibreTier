@@ -6,6 +6,7 @@ import { FAQSection } from "@/components/landing/FAQSection";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { BackgroundGlow } from "@/components/ui/background-glow";
 import { Button } from "@/components/ui/button";
+import { GitHubButton } from "@/components/ui/button-github";
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
 
@@ -23,6 +24,7 @@ export default function Home() {
             <Button variant="ghost" asChild>
               <Link href="/tiers">My Tier Lists</Link>
             </Button>
+            <GitHubButton />
             <ThemeToggle />
           </div>
         </div>
