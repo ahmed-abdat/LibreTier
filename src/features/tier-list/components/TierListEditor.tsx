@@ -587,8 +587,8 @@ export function TierListEditor() {
         </DragOverlay>
       </DndContext>
 
-      {/* Help text */}
-      <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t pt-4 text-[10px] sm:gap-x-6 sm:text-xs">
+      {/* Help text - desktop only (keyboard hints aren't useful on touch) */}
+      <div className="text-muted-foreground hidden flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t pt-4 text-xs md:flex">
         <span className="flex items-center gap-1.5">
           <Kbd>Drag</Kbd>
           items to rank
@@ -603,11 +603,11 @@ export function TierListEditor() {
           <Kbd>Ctrl+Z</Kbd>
           undo
         </span>
-        <span className="hidden items-center gap-1.5 sm:flex">
+        <span className="flex items-center gap-1.5">
           <Kbd>Ctrl+Shift+Z</Kbd>
           redo
         </span>
-        <span className="hidden items-center gap-1.5 md:flex">
+        <span className="flex items-center gap-1.5">
           <Kbd>Esc</Kbd>
           to cancel
         </span>
