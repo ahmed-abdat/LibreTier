@@ -10,6 +10,7 @@ import {
   AlertCircle,
   ExternalLink,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -34,21 +35,37 @@ import {
   type ShareResult,
   type ShareabilityResult,
 } from "../utils/url-share";
+import { captureElementAsPngBlob } from "../utils/capture";
 import { useSettingsStore } from "../store/settings-store";
+import { copyToClipboard } from "@/lib/clipboard";
+import { logger } from "@/lib/logger";
+
+const log = logger.child("ShareDialog");
 
 interface ShareDialogProps {
   tierList: TierList | null;
   isMobile?: boolean;
+  /**
+   * Ref to the editor's tier-list DOM node. When provided, a PNG screenshot
+   * is captured at share-time and used as the OG preview image.
+   */
+  captureRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 type ShareState = "idle" | "creating" | "success" | "error";
 
-export function ShareDialog({ tierList, isMobile = false }: ShareDialogProps) {
+export function ShareDialog({
+  tierList,
+  isMobile = false,
+  captureRef,
+}: ShareDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [shareState, setShareState] = useState<ShareState>("idle");
   const [shareResult, setShareResult] = useState<ShareResult | null>(null);
   const [progress, setProgress] = useState<ShareProgress | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const { resolvedTheme } = useTheme();
 
   // Get custom API key from settings
   const customApiKey = useSettingsStore(
@@ -68,10 +85,30 @@ export function ShareDialog({ tierList, isMobile = false }: ShareDialogProps) {
     setShareResult(null);
     setProgress({ status: "idle", message: "Starting..." });
 
-    void createShareableUrl(tierList, {
-      onProgress: (p) => setProgress(p),
-      customApiKey,
-    }).then((result) => {
+    void (async () => {
+      // Capture preview screenshot if we have a ref. Failure is non-fatal —
+      // sharing still works, just without a per-list OG image.
+      let screenshotBlob: Blob | undefined;
+      if (captureRef?.current) {
+        try {
+          setProgress({
+            status: "compressing",
+            message: "Capturing preview...",
+          });
+          screenshotBlob = await captureElementAsPngBlob(captureRef.current, {
+            theme: resolvedTheme === "dark" ? "dark" : "light",
+          });
+        } catch (error) {
+          log.warn("Preview capture failed", { error: String(error) });
+        }
+      }
+
+      const result = await createShareableUrl(tierList, {
+        onProgress: (p) => setProgress(p),
+        customApiKey,
+        screenshotBlob,
+      });
+
       if (result.success) {
         setShareState("success");
         setShareResult(result);
@@ -79,30 +116,17 @@ export function ShareDialog({ tierList, isMobile = false }: ShareDialogProps) {
         setShareState("error");
         setShareResult(result);
       }
-    });
-  }, [tierList, customApiKey]);
+    })();
+  }, [tierList, customApiKey, captureRef, resolvedTheme]);
 
   const handleCopy = useCallback(() => {
     const url = shareResult?.url;
     if (!url) return;
 
-    navigator.clipboard.writeText(url).then(
-      () => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      },
-      () => {
-        // Fallback for older browsers
-        const textArea = document.createElement("textarea");
-        textArea.value = url;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    );
+    void copyToClipboard(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   }, [shareResult]);
 
   const handleOpenChange = useCallback((open: boolean) => {

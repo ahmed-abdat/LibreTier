@@ -359,7 +359,7 @@ export const TierRow = memo(function TierRow({
       {/* Tier Content (Droppable Area) */}
       <div
         ref={setDroppableRef}
-        className="bg-muted/20 grid min-h-20 flex-1 grid-cols-[repeat(auto-fill,72px)] content-start items-start gap-2 p-2"
+        className="bg-muted/20 grid min-h-20 flex-1 grid-cols-[repeat(auto-fill,72px)] content-start items-start gap-1.5 p-1.5 sm:gap-2 sm:p-2"
       >
         <SortableContext items={itemIds} strategy={rectSortingStrategy}>
           {row.items.map((item) => (

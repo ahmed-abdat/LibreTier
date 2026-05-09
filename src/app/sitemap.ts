@@ -1,23 +1,22 @@
 import type { MetadataRoute } from "next";
-
-const BASE_URL = "https://libretier.vercel.app";
+import { SITE_URL } from "@/lib/constants";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: BASE_URL,
+      url: SITE_URL,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: `${BASE_URL}/tiers`,
+      url: `${SITE_URL}/tiers`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/share`,
+      url: `${SITE_URL}/share`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,

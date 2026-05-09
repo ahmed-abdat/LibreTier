@@ -48,7 +48,11 @@ export function FloatingActionBar({
         />
 
         {/* Share Link Button - Mobile optimized */}
-        <ShareDialog tierList={tierList} isMobile />
+        <ShareDialog
+          tierList={tierList}
+          isMobile
+          captureRef={exportTargetRef}
+        />
 
         {/* Menu Button - Opens drawer on mobile */}
         <EditorMenu

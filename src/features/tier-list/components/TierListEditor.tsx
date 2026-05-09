@@ -426,7 +426,7 @@ export function TierListEditor() {
             filename={currentList.title.toLowerCase().replace(/\s+/g, "-")}
             hasItems={currentList.rows.some((row) => row.items.length > 0)}
           />
-          <ShareDialog tierList={currentList} />
+          <ShareDialog tierList={currentList} captureRef={exportRef} />
           <EditorMenu
             tierList={currentList}
             onOpenSettings={() => setSettingsOpen(true)}

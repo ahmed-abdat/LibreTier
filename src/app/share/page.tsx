@@ -1,101 +1,23 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Copy, Check, Plus, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
 import { PageLoadingSpinner } from "@/components/ui/loading-spinner";
 import { NotFoundPage } from "@/components/ui/not-found-card";
 import { parseShareUrl } from "@/features/tier-list/utils/url-share";
 import { useTierStore } from "@/features/tier-list/store";
-import { getContrastColor } from "@/lib/utils";
-import type { TierList, TierRow, TierItem } from "@/features/tier-list";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-// Read-only tier item component
-function SharedTierItem({ item }: { item: TierItem }) {
-  const [imageError, setImageError] = useState(false);
-
-  return (
-    <Tooltip delayDuration={400}>
-      <TooltipTrigger asChild>
-        <div className="hover:border-primary/40 relative h-[72px] w-[72px] overflow-hidden rounded-lg border-2 border-transparent shadow-sm transition-all hover:shadow-md">
-          {item.imageUrl && !imageError ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={item.imageUrl}
-              alt={item.name}
-              loading="lazy"
-              className="h-full w-full object-cover"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <div className="bg-secondary text-secondary-foreground flex h-full w-full items-center justify-center p-1.5 text-center text-[10px] leading-tight font-medium">
-              <span className="line-clamp-3">{item.name}</span>
-            </div>
-          )}
-        </div>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[180px] px-3 py-2">
-        <p className="text-sm leading-tight font-medium">{item.name}</p>
-        {item.description && (
-          <p className="text-muted-foreground mt-1 text-xs leading-snug">
-            {item.description}
-          </p>
-        )}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-// Read-only tier row component
-function SharedTierRow({ row }: { row: TierRow }) {
-  const textColor = getContrastColor(row.color);
-
-  return (
-    <div className="border-border flex border-b last:border-b-0">
-      {/* Tier Label */}
-      <div
-        className="flex w-24 min-w-24 shrink-0 items-center justify-center font-bold"
-        style={{ backgroundColor: row.color }}
-      >
-        <span
-          className="block w-full p-1 text-center font-bold drop-shadow-xs"
-          style={{
-            color: textColor,
-            fontSize: "14px",
-            lineHeight: "1.2",
-            wordBreak: "break-word",
-          }}
-        >
-          {row.name ?? row.level}
-        </span>
-      </div>
-
-      {/* Tier Content */}
-      <div className="bg-muted/20 grid min-h-20 flex-1 grid-cols-[repeat(auto-fill,72px)] content-start items-start gap-2 p-2">
-        {row.items.map((item) => (
-          <SharedTierItem key={item.id} item={item} />
-        ))}
-      </div>
-    </div>
-  );
-}
+import type { TierList } from "@/features/tier-list";
+import { SharedTierView } from "./_components/shared-tier-view";
 
 export default function SharePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [sharedList, setSharedList] = useState<TierList | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const importList = useTierStore((state) => state.importList);
 
@@ -120,50 +42,18 @@ export default function SharePage() {
     setSharedList(parsed);
   }, []);
 
-  // Copy current URL to clipboard
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href).then(
-      () => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      },
-      () => {
-        // Fallback for older browsers
-        const textArea = document.createElement("textarea");
-        textArea.value = window.location.href;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    );
-  };
-
   // Clone to user's tier lists
-  const handleClone = () => {
-    if (!sharedList) return;
-
+  const handleClone = (tierList: TierList) => {
     // Create a new list with fresh IDs - importList returns the new list ID
     const newListId = importList({
-      ...sharedList,
-      title: `${sharedList.title} (Copy)`,
+      ...tierList,
+      title: `${tierList.title} (Copy)`,
     });
 
     if (newListId) {
       router.push(`/editor/${newListId}`);
     }
   };
-
-  // Count total items
-  const itemCount = useMemo(() => {
-    if (!sharedList) return 0;
-    return (
-      sharedList.rows.reduce((acc, row) => acc + row.items.length, 0) +
-      sharedList.unassignedItems.length
-    );
-  }, [sharedList]);
 
   // Loading state
   if (!mounted) {
@@ -207,84 +97,9 @@ export default function SharePage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-4">
+      <main className="flex-1 px-2 py-4 sm:px-4">
         <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-4"
-          >
-            {/* Title and Actions */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
-                    Shared
-                  </span>
-                </div>
-                <h1 className="text-2xl font-bold md:text-3xl">
-                  {sharedList.title}
-                </h1>
-                <p className="text-muted-foreground text-sm">
-                  {sharedList.rows.length} tiers &middot; {itemCount} items
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopyLink}
-                  className="gap-2"
-                >
-                  {copied ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                  {copied ? "Copied!" : "Copy Link"}
-                </Button>
-                <Button size="sm" onClick={handleClone} className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Clone to My Lists
-                </Button>
-              </div>
-            </div>
-
-            {/* Tier List */}
-            <div className="border-border overflow-hidden rounded-lg border">
-              {sharedList.rows.map((row) => (
-                <SharedTierRow key={row.id} row={row} />
-              ))}
-            </div>
-
-            {/* Unassigned Items */}
-            {sharedList.unassignedItems.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-muted-foreground text-sm font-medium">
-                  Unranked Items ({sharedList.unassignedItems.length})
-                </h3>
-                <div className="border-border bg-muted/20 grid grid-cols-[repeat(auto-fill,72px)] gap-2 rounded-lg border p-3">
-                  {sharedList.unassignedItems.map((item) => (
-                    <SharedTierItem key={item.id} item={item} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Footer CTA */}
-            <div className="border-border bg-muted/30 rounded-lg border p-4 text-center">
-              <p className="text-muted-foreground mb-2 text-sm">
-                Want to create your own tier list?
-              </p>
-              <Button asChild variant="outline">
-                <Link href="/">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create New Tier List
-                </Link>
-              </Button>
-            </div>
-          </motion.div>
+          <SharedTierView tierList={sharedList} onClone={handleClone} />
         </div>
       </main>
     </div>

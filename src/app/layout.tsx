@@ -6,6 +6,7 @@ import { InstallPrompt, OfflineIndicator } from "@/features/pwa";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { roboto } from "./font";
+import { SITE_URL } from "@/lib/constants";
 import type { Metadata, Viewport } from "next";
 
 export const viewport: Viewport = {
@@ -16,7 +17,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://libretier.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: "Free Tier List Maker - No Login Required | LibreTier",
   description:
     "Create and share tier lists instantly. No account needed. Works offline. Upload images, drag to rank, export as PNG. Free, open source, privacy-first tier list creator.",
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://libretier.vercel.app",
+    url: SITE_URL,
     siteName: "LibreTier",
     title: "Free Tier List Maker - No Login Required | LibreTier",
     description:
@@ -58,7 +59,7 @@ export const metadata: Metadata = {
     creator: "@libretier",
   },
   alternates: {
-    canonical: "https://libretier.vercel.app",
+    canonical: SITE_URL,
   },
   robots: {
     index: true,
@@ -79,7 +80,7 @@ const jsonLd = {
   name: "LibreTier",
   description:
     "Free, open-source tier list maker. Create and share tier lists instantly with no account required.",
-  url: "https://libretier.vercel.app",
+  url: SITE_URL,
   applicationCategory: "UtilitiesApplication",
   operatingSystem: "Any",
   offers: {

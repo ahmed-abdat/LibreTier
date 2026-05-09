@@ -3,45 +3,32 @@ import type { TierList, TierRow, TierItem } from "../index";
 import type { TierLevel } from "../constants";
 import { TIER_LEVELS } from "../constants";
 import { getItemsWithBase64Images, isBase64Image } from "./json-export";
-import { uploadImages } from "@/lib/services/imgbb";
+import { uploadImage, uploadImages } from "@/lib/services/imgbb";
 import { logger } from "@/lib/logger";
 import {
   isValidHexColor,
   MAX_URL_LENGTH,
   MAX_DECOMPRESSED_SIZE,
+  SITE_URL,
 } from "@/lib/constants";
+import {
+  SHARE_VERSION,
+  isValidMinimalExport,
+  type MinimalExport,
+  type MinimalItem,
+  type MinimalRow,
+} from "./share-schema";
 
-// Minimal export schema version
-const SHARE_VERSION = 1;
+const log = logger.child("UrlShare");
 
-/**
- * Minimal item structure for URL sharing (short keys to reduce size)
- */
-interface MinimalItem {
-  n: string; // name
-  u?: string; // image URL (imgbb URL, not base64)
-  d?: string; // description (optional)
-}
-
-/**
- * Minimal row structure for URL sharing
- */
-interface MinimalRow {
-  l: string; // level (S/A/B/C/D/F)
-  c: string; // color (hex)
-  n?: string; // custom name (optional)
-  i: MinimalItem[]; // items
-}
-
-/**
- * Minimal export structure for URL sharing
- */
-interface MinimalExport {
-  v: number; // version
-  t: string; // title
-  r: MinimalRow[]; // rows
-  u?: MinimalItem[]; // unassigned items
-}
+// Re-export schema types so existing call sites keep working.
+export {
+  SHARE_VERSION,
+  isValidMinimalExport,
+  type MinimalExport,
+  type MinimalItem,
+  type MinimalRow,
+};
 
 export interface ShareResult {
   success: boolean;
@@ -153,6 +140,69 @@ function decompressFromUrl(compressed: string): MinimalExport | null {
 export interface ShareOptions {
   onProgress?: (progress: ShareProgress) => void;
   customApiKey?: string;
+  /**
+   * Optional PNG screenshot of the tier list. When provided, it's uploaded
+   * to imgbb and used as the OG image for `/share/<id>` previews.
+   */
+  screenshotBlob?: Blob;
+}
+
+interface CreateShortShareResponse {
+  success: boolean;
+  id?: string;
+  error?: { code?: string; message?: string };
+}
+
+/**
+ * Convert a Blob to a base64 data URL (browser only).
+ */
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () =>
+      reject(reader.error ?? new Error("FileReader error"));
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === "string") resolve(result);
+      else reject(new Error("FileReader returned non-string"));
+    };
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * Try to create a short share URL via POST /api/share. Returns null when the
+ * store is unavailable (no Upstash env vars set) or any other error occurs,
+ * so the caller can fall back to the hash-based URL.
+ */
+async function createShortShareUrl(
+  baseUrl: string,
+  data: MinimalExport,
+  ogImageUrl: string | undefined
+): Promise<string | null> {
+  try {
+    const response = await fetch("/api/share", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data, ogImageUrl }),
+    });
+
+    if (response.status === 503) return null; // store not configured -> fall back
+
+    const result = (await response.json()) as CreateShortShareResponse;
+    if (!response.ok || !result.success || !result.id) {
+      log.warn("Short share creation failed", {
+        status: response.status,
+        code: result.error?.code,
+      });
+      return null;
+    }
+
+    return `${baseUrl}/share/${result.id}`;
+  } catch (error) {
+    log.warn("Short share request failed", { error: String(error) });
+    return null;
+  }
 }
 
 /**
@@ -168,7 +218,7 @@ export async function createShareableUrl(
   // Support legacy signature (just onProgress function)
   const opts: ShareOptions =
     typeof options === "function" ? { onProgress: options } : (options ?? {});
-  const { onProgress, customApiKey } = opts;
+  const { onProgress, customApiKey, screenshotBlob } = opts;
 
   try {
     // 1. Get items with base64 images that need uploading
@@ -212,23 +262,55 @@ export async function createShareableUrl(
       }
     }
 
-    // 3. Compress
+    // 3. Optionally upload the OG screenshot. Failure here is non-fatal —
+    //    the share still works, just without a per-list preview image.
+    let ogImageUrl: string | undefined;
+    if (screenshotBlob) {
+      onProgress?.({
+        status: "uploading",
+        message: "Uploading preview image...",
+      });
+      try {
+        const dataUrl = await blobToDataUrl(screenshotBlob);
+        const result = await uploadImage(
+          dataUrl,
+          `libretier-preview-${Date.now()}.png`,
+          { customApiKey }
+        );
+        if (result.success && result.url) ogImageUrl = result.url;
+        else log.warn("OG screenshot upload failed", { error: result.error });
+      } catch (error) {
+        log.warn("OG screenshot upload threw", { error: String(error) });
+      }
+    }
+
+    // 4. Build the minimal payload
     onProgress?.({
       status: "compressing",
       message: "Creating share link...",
     });
 
     const minimalData = toMinimalExport(tierList, imageUrlMap);
-    const compressed = compressForUrl(minimalData);
 
-    // 4. Generate URL
     const baseUrl =
-      typeof window !== "undefined"
-        ? window.location.origin
-        : "https://libretier.vercel.app";
+      typeof window !== "undefined" ? window.location.origin : SITE_URL;
+
+    // 5. Try the short-ID flow first. Falls back to hash URL when the share
+    //    store isn't configured or the request fails for any reason.
+    const shortUrl = await createShortShareUrl(
+      baseUrl,
+      minimalData,
+      ogImageUrl
+    );
+    if (shortUrl) {
+      onProgress?.({ status: "done", message: "Share link created!" });
+      return { success: true, url: shortUrl, urlLength: shortUrl.length };
+    }
+
+    // 6. Fallback: hash-based URL
+    const compressed = compressForUrl(minimalData);
     const shareUrl = `${baseUrl}/share#${compressed}`;
 
-    // 5. Check length
     if (shareUrl.length > MAX_URL_LENGTH) {
       return {
         success: false,
@@ -267,31 +349,23 @@ function isValidTierLevel(level: string): level is TierLevel {
 }
 
 /**
- * Parse a share URL and return the tier list data
- * @param hash The URL hash (without the # prefix)
- * @returns Parsed tier list or null if invalid
+ * Reconstruct a TierList from a MinimalExport (the server-stored or
+ * URL-decoded payload). Validates schema version and required fields.
+ * Returns null if the payload is invalid.
  */
-export function parseShareUrl(hash: string): TierList | null {
-  if (!hash) return null;
-
-  const data = decompressFromUrl(hash);
-  if (!data) return null;
-
-  // Validate version
-  if (data.v !== SHARE_VERSION) {
-    logger.warn("Unknown share version", { version: data.v });
-    return null;
-  }
-
-  // Validate required fields
-  if (!data.t || !Array.isArray(data.r)) {
+export function minimalExportToTierList(data: unknown): TierList | null {
+  if (!isValidMinimalExport(data)) {
+    const version =
+      data && typeof data === "object" && "v" in data
+        ? (data as { v: unknown }).v
+        : undefined;
+    log.warn("Invalid share payload", { version });
     return null;
   }
 
   try {
     const now = new Date();
 
-    // Convert minimal items to TierItems
     const toTierItem = (item: MinimalItem, index: number): TierItem => ({
       id: `shared-item-${index}-${Date.now()}`,
       name: item.n || "Untitled",
@@ -301,7 +375,6 @@ export function parseShareUrl(hash: string): TierList | null {
       updatedAt: now,
     });
 
-    // Convert minimal rows to TierRows
     const rows: TierRow[] = data.r.map((row, rowIndex) => {
       const level = isValidTierLevel(row.l) ? row.l : "S";
       const color = isValidHexColor(row.c) ? row.c : "#808080";
@@ -317,7 +390,6 @@ export function parseShareUrl(hash: string): TierList | null {
       };
     });
 
-    // Convert unassigned items
     const unassignedItems: TierItem[] = (data.u ?? []).map((item, index) =>
       toTierItem(item, 1000 + index)
     );
@@ -335,6 +407,18 @@ export function parseShareUrl(hash: string): TierList | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Parse a share URL hash and return the tier list data.
+ * @param hash The URL hash (without the # prefix)
+ * @returns Parsed tier list or null if invalid
+ */
+export function parseShareUrl(hash: string): TierList | null {
+  if (!hash) return null;
+  const data = decompressFromUrl(hash);
+  if (!data) return null;
+  return minimalExportToTierList(data);
 }
 
 /**

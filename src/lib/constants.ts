@@ -34,3 +34,8 @@ export const MAX_DECOMPRESSED_SIZE = 5 * 1024 * 1024;
 
 /** Maximum file size for imports (10MB) */
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+// Site
+
+/** Canonical site URL — used for absolute links and OG metadata. */
+export const SITE_URL = "https://libretier.vercel.app";
